@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://riuc-backend2.vercel.app/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://riuc-backend2.vercel.app/api/:path*"
     }
   ]
 }
