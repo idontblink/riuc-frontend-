@@ -769,6 +769,56 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+
+    /* ── LIGHT MODE ── */
+    body.light {
+      --navy: #F0F4FF;
+      --navy2: #E4EAFB;
+      --bg: #F0F4FF;
+      --bg2: rgba(0,0,0,0.04);
+      --bg3: rgba(0,0,0,0.08);
+      --glass: rgba(255,255,255,0.7);
+      --glass-border: rgba(0,0,0,0.1);
+      --glass-hover: rgba(255,255,255,0.85);
+      --t1: #0A1628;
+      --t2: #3D5280;
+      --t3: #7A90C0;
+      background: #EEF2FF;
+    }
+    body.light .bg-orbs .orb { opacity: 0.06; }
+    body.light .header {
+      background: rgba(240,244,255,0.85);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    body.light .bottom-nav {
+      background: rgba(240,244,255,0.9);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+    }
+    body.light .modal, body.light .notif-panel, body.light .detail-modal {
+      background: #F8FAFF;
+    }
+    body.light .form-input, body.light .search-input, body.light .comment-input {
+      background: rgba(255,255,255,0.9);
+      color: #0A1628;
+    }
+    body.light .filter-select { background: rgba(255,255,255,0.8); color: #0A1628; }
+    body.light .filter-select option { background: #F0F4FF; color: #0A1628; }
+    body.light .paper-card { background: rgba(255,255,255,0.7); }
+    body.light .auth-card, body.light .pending-item, body.light .a-stat,
+    body.light .comment-item, body.light .p-stat { background: rgba(255,255,255,0.8); }
+    body.light .skeleton {
+      background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.06) 75%);
+      background-size: 200% 100%;
+    }
+    body.light .admin-hero {
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(245,200,66,0.06));
+    }
+    body.light .preview-container { background: #fff; }
+    body.light .toast {
+      background: rgba(240,244,255,0.95);
+      color: #0A1628;
+    }
+
   </style>
 </head>
 <body>
@@ -1041,15 +1091,17 @@
   function loadTheme() {
     const saved = localStorage.getItem('theme');
     const isDark = saved ? saved === 'dark' : true;
+    document.body.classList.toggle('light', !isDark);
     document.getElementById('theme-btn').textContent = isDark ? '☀️' : '🌙';
   }
 
   function toggleTheme() {
+    const isNowLight = !document.body.classList.contains('light');
+    document.body.classList.toggle('light', isNowLight);
     const btn = document.getElementById('theme-btn');
-    const isLight = btn.textContent === '🌙';
-    btn.textContent = isLight ? '☀️' : '🌙';
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
-    toast(isLight ? '☀️ Light mode' : '🌙 Dark mode');
+    btn.textContent = isNowLight ? '🌙' : '☀️';
+    localStorage.setItem('theme', isNowLight ? 'light' : 'dark');
+    toast(isNowLight ? '☀️ Light mode on' : '🌙 Dark mode on');
   }
 
   // ── NAVIGATION ───────────────────────────────────────────────────────
