@@ -710,6 +710,57 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+
+    /* ── PAPER PREVIEW ── */
+    .preview-container {
+      width: 100%; border-radius: var(--r); overflow: hidden;
+      background: #000; margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+      position: relative;
+    }
+    .preview-pdf {
+      width: 100%; height: 420px; border: none; display: block;
+      background: #1a1a2e;
+    }
+    .preview-img {
+      width: 100%; max-height: 420px; object-fit: contain;
+      display: block; background: #1a1a2e;
+    }
+    .preview-tabs {
+      display: flex; gap: 6px; margin-bottom: 10px;
+    }
+    .preview-tab {
+      flex: 1; background: var(--bg2); border: 1px solid var(--glass-border);
+      border-radius: var(--r); padding: 8px;
+      font-family: "DM Sans", sans-serif; font-size: 12px; font-weight: 500;
+      color: var(--t2); cursor: pointer; text-align: center; transition: all 0.2s;
+    }
+    .preview-tab.active { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.3); color: var(--gold); }
+    .dl-btn-wrap { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .btn-dl-solid {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--gold), #e6b800);
+      color: var(--navy); border: none; border-radius: var(--r);
+      padding: 9px 16px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: "DM Sans", sans-serif;
+      transition: all 0.2s; text-decoration: none;
+      box-shadow: 0 4px 12px rgba(245,200,66,0.3);
+    }
+    .btn-dl-solid:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(245,200,66,0.4); }
+    .btn-dl-outline {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg2); border: 1px solid var(--glass-border);
+      color: var(--t1); border-radius: var(--r);
+      padding: 9px 16px; font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: "DM Sans", sans-serif;
+      transition: all 0.2s; text-decoration: none;
+    }
+    .btn-dl-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
+    .preview-error {
+      padding: 2rem; text-align: center; color: var(--t3); font-size: 13px;
+      background: var(--bg2); border-radius: var(--r);
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
@@ -1139,30 +1190,54 @@
   }
 
   // ── PAPER DETAIL ─────────────────────────────────────────────────────
+  let currentPaper = null;
+
   async function viewPaper(id) {
     document.getElementById('detail-modal').classList.add('open');
-    document.getElementById('detail-content').innerHTML = `<div class="empty"><span class="empty-icon">⏳</span><p>Loading...</p></div>`;
+    document.getElementById('detail-content').innerHTML = `
+      <div class="empty"><span class="empty-icon">⏳</span><p>Loading...</p></div>`;
     try {
       const res  = await fetch(`${API}/api/papers/${id}`);
       const data = await res.json();
-      const p    = data.paper || data;
+      currentPaper = data.paper || data;
+      const p = currentPaper;
 
-      // Load comments
       let comments = [];
       try {
-        const cr   = await fetch(`${API}/api/papers/${id}/comments`, { headers: authHeaders() });
-        const cd   = await cr.json();
-        comments   = cd.comments || [];
+        const cr = await fetch(`${API}/api/papers/${id}/comments`);
+        const cd = await cr.json();
+        comments = cd.comments || [];
       } catch {}
 
-      const userRating = localStorage.getItem(`rating_${id}`) || 0;
+      const userRating = parseInt(localStorage.getItem(`rating_${id}`) || 0);
+      const isPdf = p.file_url && p.file_url.toLowerCase().includes('.pdf');
+      const hasAnswer = !!p.answer_file_url;
+
+      // Build preview tabs
+      const previewTabs = hasAnswer ? `
+        <div class="preview-tabs">
+          <button class="preview-tab active" id="tab-q" onclick="switchPreview('question', ${id})">📄 Question Paper</button>
+          <button class="preview-tab" id="tab-a" onclick="switchPreview('answer', ${id})">📋 Answer Sheet</button>
+        </div>` : '';
+
+      // Build preview
+      const previewHtml = buildPreview(p.file_url, 'preview-main-' + id);
 
       document.getElementById('detail-content').innerHTML = `
-        <div class="detail-img">📄</div>
-        <div class="pc-code" style="margin-bottom:8px">${p.course_code}</div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px">${p.course_name}</div>
+        ${previewTabs}
+        <div id="preview-wrap-${id}">${previewHtml}</div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span class="pc-code">${p.course_code}</span>
+          <span class="pc-type-badge ${typeClass(p.exam_type)}">${p.exam_type || ''}</span>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:4px">${p.course_name}</div>
         <div class="pc-meta" style="margin-bottom:1rem">
-          <span>${p.department}</span> · <span>${p.year}</span> · <span>${p.exam_type}</span>
+          <span>${p.department}</span>
+          <span class="pc-meta-dot">·</span>
+          <span>${p.year}</span>
+          <span class="pc-meta-dot">·</span>
+          <span>by ${p.uploader_name || 'RIUC Student'}</span>
         </div>
 
         <div class="rating-section">
@@ -1172,34 +1247,99 @@
           </div>
         </div>
 
-        <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap">
-          <a class="btn-dl" href="${p.file_url}" target="_blank" download>⬇ Download Question</a>
-          ${p.answer_file_url ? `<a class="btn-dl" href="${p.answer_file_url}" target="_blank">📋 View Answers</a>` : ''}
+        <div class="dl-btn-wrap">
+          <button class="btn-dl-solid" onclick="downloadFile('${p.file_url}', '${p.course_code}_${p.year}_question')">
+            ⬇ Download Question
+          </button>
+          ${hasAnswer ? `<button class="btn-dl-outline" onclick="downloadFile('${p.answer_file_url}', '${p.course_code}_${p.year}_answers')">📋 Download Answers</button>` : ''}
         </div>
 
         <div class="section-title">Comments (${comments.length})</div>
         <div id="comments-${id}">
-          ${comments.length ? comments.map(c => `
-            <div class="comment-item">
-              <div class="comment-author">${c.username || 'Student'}</div>
-              <div class="comment-text">${c.text}</div>
-            </div>`).join('') : '<div style="font-size:13px;color:var(--t3);margin-bottom:10px">No comments yet. Be the first! 👇</div>'}
+          ${comments.length
+            ? comments.map(c => `
+              <div class="comment-item">
+                <div class="comment-author">${c.profile_name || c.username || 'Student'}</div>
+                <div class="comment-text">${c.text}</div>
+              </div>`).join('')
+            : '<div style="font-size:13px;color:var(--t3);margin-bottom:10px">No comments yet. Be the first! 👇</div>'}
         </div>
-        ${isLoggedIn() ? `
-          <div class="comment-input-wrap">
-            <input class="comment-input" id="comment-input-${id}" placeholder="Share thoughts on this paper...">
-            <button class="btn-comment" onclick="postComment(${id})">Send</button>
-          </div>` : `<p style="font-size:12px;color:var(--t3)"><a style="color:var(--gold);cursor:pointer" onclick="closeDetail();switchNav('profile');renderAuth('login')">Log in</a> to comment</p>`}
+        ${isLoggedIn()
+          ? `<div class="comment-input-wrap">
+               <input class="comment-input" id="comment-input-${id}" placeholder="Share thoughts on this paper...">
+               <button class="btn-comment" onclick="postComment(${id})">Send</button>
+             </div>`
+          : `<p style="font-size:12px;color:var(--t3);margin-top:8px">
+               <a style="color:var(--gold);cursor:pointer" onclick="closeDetail();switchNav('profile')">Log in</a> to comment
+             </p>`}
 
         <div style="margin-top:1.25rem">
           <button class="btn-cancel" style="width:100%" onclick="closeDetail()">Close</button>
         </div>`;
     } catch (err) {
-      document.getElementById('detail-content').innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`;
+      document.getElementById('detail-content').innerHTML = `
+        <div class="empty"><span class="empty-icon">⚠️</span><h3>Couldn't load</h3><p>${err.message}</p></div>`;
     }
   }
 
-  function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
+  function buildPreview(url, id) {
+    if (!url) return '<div class="preview-error">No file attached</div>';
+    const isPdf = url.toLowerCase().includes('.pdf') || url.includes('resource_type=raw');
+    if (isPdf) {
+      // Use Google Docs viewer as fallback for cross-origin PDFs
+      const gviewUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+      return `
+        <div class="preview-container">
+          <iframe class="preview-pdf" id="${id}" src="${gviewUrl}"
+            allowfullscreen loading="lazy"
+            onerror="this.style.display='none';document.getElementById('${id}-fb').style.display='block'">
+          </iframe>
+          <div id="${id}-fb" style="display:none" class="preview-error">
+            Preview unavailable. Use the download button below. 👇
+          </div>
+        </div>`;
+    } else {
+      return `
+        <div class="preview-container">
+          <img class="preview-img" src="${url}" alt="Paper preview"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <div class="preview-error" style="display:none">Image preview failed. Download to view.</div>
+        </div>`;
+    }
+  }
+
+  function switchPreview(type, id) {
+    const p = currentPaper;
+    if (!p) return;
+    const url  = type === 'answer' ? p.answer_file_url : p.file_url;
+    const wrap = document.getElementById('preview-wrap-' + id);
+    if (wrap) wrap.innerHTML = buildPreview(url, 'preview-' + type + '-' + id);
+    document.getElementById('tab-q')?.classList.toggle('active', type === 'question');
+    document.getElementById('tab-a')?.classList.toggle('active', type === 'answer');
+  }
+
+  // Download fix — fetch as blob to bypass cross-origin download block
+  async function downloadFile(url, filename) {
+    toast('⏳ Preparing download...');
+    try {
+      const res  = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const ext  = url.split('.').pop().split('?')[0] || 'pdf';
+      const a    = document.createElement('a');
+      a.href     = URL.createObjectURL(blob);
+      a.download = filename + '.' + ext;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast('✅ Download started!');
+    } catch (err) {
+      // Fallback: open in new tab
+      window.open(url, '_blank');
+      toast('📄 Opened in new tab');
+    }
+  }
+
+  function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); currentPaper = null; }
 
   // ── RATINGS ──────────────────────────────────────────────────────────
   function hoverStars(id, n) {
@@ -1774,3 +1914,4 @@
 
 </body>
 </html>
+
