@@ -45,7 +45,7 @@
       position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
     }
     .orb {
-      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.18;
+      position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.10;
       animation: float 12s ease-in-out infinite;
     }
     .orb-1 { width: 500px; height: 500px; background: var(--purple); top: -200px; right: -100px; animation-delay: 0s; }
@@ -53,8 +53,8 @@
     .orb-3 { width: 300px; height: 300px; background: var(--gold); top: 40%; left: 30%; animation-delay: -8s; }
     @keyframes float {
       0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -30px) scale(1.05); }
-      66% { transform: translate(-20px, 20px) scale(0.95); }
+      33% { transform: translate(15px, -15px) scale(1.02); }
+      66% { transform: translate(-10px, 10px) scale(0.98); }
     }
 
     /* ── LAYOUT ── */
@@ -87,7 +87,7 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
       animation: slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1);
     }
-    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     .header-left { display: flex; align-items: center; gap: 10px; }
     .logo {
@@ -138,7 +138,7 @@
       font-size: 11px; font-weight: 500; color: var(--gold);
       margin-bottom: 1rem; letter-spacing: 0.5px;
     }
-    .hero-badge::before { content: '✦'; }
+    .hero-badge::before { content: ''; }
 
     .hero h1 {
       font-family: 'Syne', sans-serif;
@@ -787,10 +787,10 @@
 <div class="app">
   <header class="header">
     <div class="header-left">
-      <div class="logo">PP</div>
+      <div class="logo">PR</div>
       <div>
-        <div class="site-name">PastPapers RIUC</div>
-        <div class="site-sub">Rosebank International</div>
+        <div class="site-name">PastPapers</div>
+        <div class="site-sub">RIUC Student Hub</div>
       </div>
     </div>
     <div class="header-right">
@@ -803,18 +803,17 @@
   <!-- ── SEARCH VIEW ── -->
   <div class="view active" id="view-search">
     <div class="hero">
-      <div class="hero-badge">RIUC Past Questions Database</div>
-      <h1>Study smarter,<br>not <span class="grad">harder</span> ✦</h1>
-      <p>Access past exam papers from every course. Uploaded by students, for students.</p>
+      <h1>Your school,<br>your <span class="grad">past papers.</span></h1>
+      <p>Finals are stressful enough. Find past questions from your actual courses at RIUC — uploaded by students who've been there.</p>
       <div class="hero-actions">
-        <button class="btn-primary" onclick="openUpload()">+ Upload a Paper</button>
-        <button class="btn-ghost" onclick="showView('bookmarks')">📌 Saved</button>
+        <button class="btn-primary" onclick="openUpload()">Share a Paper</button>
+        <button class="btn-ghost" onclick="switchNav('bookmarks')">My Saved</button>
       </div>
     </div>
 
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-input" id="search-input" type="text" placeholder="Search by course, lecturer, keyword..." oninput="debounceSearch()">
+      <input class="search-input" id="search-input" type="text" placeholder="e.g. DCIT205, Database, Amponsah..." oninput="debounceSearch()">
     </div>
 
     <div class="filters">
@@ -847,7 +846,7 @@
     </div>
 
     <div class="section-label">
-      <h2>Papers</h2>
+      <h2>Past Questions</h2>
       <span id="result-count"></span>
     </div>
 
@@ -858,7 +857,7 @@
   <!-- ── BOOKMARKS VIEW ── -->
   <div class="view" id="view-bookmarks">
     <div class="bookmarks-header">
-      <h2>📌 Saved Papers</h2>
+      <h2>Saved Papers</h2>
     </div>
     <div id="bookmarks-list"></div>
   </div>
@@ -899,7 +898,7 @@
 <div class="modal-bg" id="upload-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h2>📎 Upload Past Question</h2>
+    <h2>Share a Past Question</h2>
     <div id="upload-alert"></div>
     <div class="form-row">
       <div class="form-group">
@@ -948,7 +947,7 @@
         ondragover="handleDrag(event,'zone',true)"
         ondragleave="handleDrag(event,'zone',false)"
         ondrop="handleFileDrop(event,'question')">
-        📎 Tap to attach PDF or image
+        Drop your PDF here or tap to browse
       </div>
       <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(event,'question')">
     </div>
@@ -959,7 +958,7 @@
         ondragover="handleDrag(event,'zone-ans',true)"
         ondragleave="handleDrag(event,'zone-ans',false)"
         ondrop="handleFileDrop(event,'answer')">
-        📎 Attach answers (optional)
+        Got the answers too? Drop them here (optional)
       </div>
       <input type="file" id="file-input-ans" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(event,'answer')">
     </div>
@@ -976,7 +975,7 @@
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeUpload()">Cancel</button>
-      <button class="btn-submit" id="submit-btn" onclick="submitUpload()">Submit for Review</button>
+      <button class="btn-submit" id="submit-btn" onclick="submitUpload()">Send for Review</button>
     </div>
   </div>
 </div>
@@ -1266,7 +1265,7 @@
         </div>
         ${isLoggedIn()
           ? `<div class="comment-input-wrap">
-               <input class="comment-input" id="comment-input-${id}" placeholder="Share thoughts on this paper...">
+               <input class="comment-input" id="comment-input-${id}" placeholder="Was this paper tough? Any tips?">
                <button class="btn-comment" onclick="postComment(${id})">Send</button>
              </div>`
           : `<p style="font-size:12px;color:var(--t3);margin-top:8px">
@@ -1423,7 +1422,7 @@
   async function fetchBookmarks() {
     const list = document.getElementById('bookmarks-list');
     if (!localBookmarks.size && !isLoggedIn()) {
-      list.innerHTML = `<div class="empty"><span class="empty-icon">📌</span><h3>Nothing saved yet</h3><p>Bookmark papers to find them quickly later.</p></div>`;
+      list.innerHTML = `<div class="empty"><span class="empty-icon">📌</span><h3>Nothing saved yet</h3><p>Tap the bookmark icon on any paper to save it here.</p></div>`;
       return;
     }
     list.innerHTML = `<div class="skeleton" style="height:80px;margin-bottom:10px;border-radius:var(--rl)"></div>`.repeat(3);
@@ -1469,9 +1468,9 @@
   function closeUpload() {
     document.getElementById('upload-modal').classList.remove('open');
     uploadedFile = uploadedAnsFile = null;
-    document.getElementById('upload-zone').textContent = '📎 Tap to attach PDF or image';
+    document.getElementById('upload-zone').textContent = 'Drop your PDF here or tap to browse';
     document.getElementById('upload-zone').className = 'upload-zone';
-    document.getElementById('upload-zone-ans').textContent = '📎 Attach answers (optional)';
+    document.getElementById('upload-zone-ans').textContent = 'Got the answers too? Drop them here (optional)';
     document.getElementById('upload-zone-ans').className = 'upload-zone';
     document.getElementById('upload-alert').innerHTML = '';
   }
@@ -1617,8 +1616,8 @@
     if (mode === 'login') {
       content.innerHTML = `
         <div class="auth-card">
-          <h2>Welcome back 👋</h2>
-          <p>Log in to upload, bookmark, and upvote past papers.</p>
+          <h2>Good to see you 👋</h2>
+          <p>Log back in to your account.</p>
           <div id="auth-alert"></div>
           <div class="form-group"><label>Email</label><input class="form-input" id="auth-email" type="email" placeholder="your@email.com"></div>
           <div class="form-group"><label>Password</label><input class="form-input" id="auth-pass" type="password" placeholder="••••••••"></div>
@@ -1628,8 +1627,8 @@
     } else {
       content.innerHTML = `
         <div class="auth-card">
-          <h2>Join PastPapers 🎓</h2>
-          <p>Create an account to start contributing to the community.</p>
+          <h2>Create an account</h2>
+          <p>Takes 30 seconds. No email verification nonsense.</p>
           <div id="auth-alert"></div>
           <div class="form-row">
             <div class="form-group"><label>Username *</label><input class="form-input" id="auth-username" placeholder="john_doe"></div>
@@ -1731,8 +1730,8 @@
           <div class="p-stat"><div class="p-stat-n">${localBookmarks.size}</div><div class="p-stat-l">Saved</div></div>
           <div class="p-stat"><div class="p-stat-n">—</div><div class="p-stat-l">Upvotes</div></div>
         </div>
-        <button class="btn-primary" style="width:100%;margin-bottom:10px" onclick="openNotifs()">🔔 Notifications</button>
-        <button class="logout-btn" onclick="logout()">🚪 Log out</button>
+        <button class="btn-primary" style="width:100%;margin-bottom:10px" onclick="openNotifs()">Notifications</button>
+        <button class="logout-btn" onclick="logout()">Log out</button>
       </div>`;
     // Fetch upload count
     fetch(`${API}/api/users/me/uploads`, { headers: authHeaders() })
@@ -1767,7 +1766,7 @@
           <h2>⚡ Admin Panel</h2>
           <p>Manage papers, users and platform stats</p>
         </div>
-        <span class="admin-pill">Admin</span>
+
       </div>
       <div class="admin-tabs">
         <button class="a-tab ${currentAdminTab==='pending'?'active':''}" onclick="loadAdmin('pending')">⏳ Pending</button>
@@ -1914,4 +1913,5 @@
 
 </body>
 </html>
+
 
