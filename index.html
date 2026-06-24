@@ -827,14 +827,11 @@
       </div>
       <div class="filters">
         <select class="filter-pill" id="filter-dept" onchange="fetchPapers(1)">
-          <option value="">All Departments</option>
-          <option>Computer Science</option>
-          <option>Business Administration</option>
-          <option>Engineering</option>
-          <option>Public Admin</option>
-          <option>Information Technology</option>
-          <option>Accounting</option>
-          <option>General Studies</option>
+          <option value="">All Faculties</option>
+          <option value="Faculty of Information and Communications Technology">ICT</option>
+          <option value="Faculty of Commerce">Commerce</option>
+          <option value="Faculty of Hospitality, Culinary and Service">Hospitality</option>
+          <option value="Short Learning Programmes">Short Courses</option>
         </select>
         <select class="filter-pill" id="filter-year" onchange="fetchPapers(1)">
           <option value="">All Years</option>
@@ -932,13 +929,10 @@
       <div class="form-group">
         <label>Department</label>
         <select class="form-input" id="u-dept">
-          <option>Computer Science</option>
-          <option>Business Administration</option>
-          <option>Engineering</option>
-          <option>Public Admin</option>
-          <option>Information Technology</option>
-          <option>Accounting</option>
-          <option>General Studies</option>
+          <option value="Faculty of Information and Communications Technology">Faculty of Information and Communications Technology</option>
+          <option value="Faculty of Commerce">Faculty of Commerce</option>
+          <option value="Faculty of Hospitality, Culinary and Service">Faculty of Hospitality, Culinary and Service</option>
+          <option value="Short Learning Programmes">Short Learning Programmes</option>
         </select>
       </div>
       <div class="form-group">
@@ -1570,11 +1564,10 @@
             <div class="form-group">
               <label>Department</label>
               <select class="form-input" id="auth-dept">
-                <option value="">Select...</option>
-                <option>Computer Science</option><option>Business Administration</option>
-                <option>Engineering</option><option>Public Admin</option>
-                <option>Information Technology</option><option>Accounting</option>
-                <option>General Studies</option>
+                <option value="">Select your faculty...</option>
+                <option value="Faculty of Information and Communications Technology">Faculty of ICT</option>
+                <option value="Faculty of Commerce">Faculty of Commerce</option>
+                <option value="Faculty of Hospitality, Culinary and Service">Faculty of Hospitality</option>
               </select>
             </div>
             <div class="form-group">
