@@ -1333,12 +1333,58 @@
 
   function buildPreview(url, id) {
     if (!url) return '<div style="text-align:center;padding:2rem;color:var(--t3);font-size:13px">No file attached</div>';
-    const isPdf = url.toLowerCase().includes('.pdf') || url.includes('resource_type=raw');
+
+    const lower = url.toLowerCase();
+    const isPdf = lower.includes('.pdf') || lower.includes('resource_type=raw') || lower.includes('/raw/');
+    const isImg = lower.includes('.jpg') || lower.includes('.jpeg') || lower.includes('.png') || lower.includes('/image/');
+
     if (isPdf) {
-      const gview = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-      return `<div class="preview-wrap"><iframe class="preview-pdf" id="${id}" src="${gview}" allowfullscreen loading="lazy"></iframe></div>`;
+      // Use PDF.js viewer — works with any URL including Cloudinary
+      const pdfJsUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(url)}`;
+      return `
+        <div class="preview-wrap">
+          <iframe
+            class="preview-pdf"
+            id="${id}"
+            src="${pdfJsUrl}"
+            allowfullscreen
+            loading="lazy"
+            onerror="showPreviewFallback('${id}', '${url}')">
+          </iframe>
+          <div id="${id}-fb" style="display:none;text-align:center;padding:1.5rem;color:var(--t3);font-size:13px">
+            <div style="font-size:2rem;margin-bottom:8px">📄</div>
+            <p>Preview unavailable in this browser.</p>
+            <a href="${url}" target="_blank" style="color:var(--riuc-blue);font-weight:600;text-decoration:none">
+              Open PDF directly →
+            </a>
+          </div>
+        </div>`;
     }
-    return `<div class="preview-wrap"><img class="preview-img" src="${url}" alt="Paper" onerror="this.style.display='none'"></div>`;
+
+    if (isImg) {
+      return `
+        <div class="preview-wrap">
+          <img class="preview-img" src="${url}" alt="Paper preview"
+            onerror="this.parentElement.innerHTML='<div style=\'text-align:center;padding:2rem;color:var(--t3);font-size:13px\'>Image failed to load</div>'">
+        </div>`;
+    }
+
+    // Unknown type — show open link
+    return `
+      <div style="text-align:center;padding:2rem;background:var(--bg2);border-radius:var(--r);margin-bottom:1rem">
+        <div style="font-size:2rem;margin-bottom:8px">📎</div>
+        <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Preview not available for this file type.</p>
+        <a href="${url}" target="_blank" style="color:var(--riuc-blue);font-weight:600;font-size:13px;text-decoration:none">
+          Open file →
+        </a>
+      </div>`;
+  }
+
+  function showPreviewFallback(id, url) {
+    const iframe = document.getElementById(id);
+    const fb     = document.getElementById(id + '-fb');
+    if (iframe) iframe.style.display = 'none';
+    if (fb)     fb.style.display = 'block';
   }
 
   function switchPreview(type, id) {
@@ -1350,23 +1396,30 @@
     document.getElementById('ptab-a')?.classList.toggle('active', type === 'answer');
   }
 
-  async function downloadFile(url, filename) {
-    toast('⏳ Preparing download...');
-    try {
-      const res  = await fetch(url);
-      if (!res.ok) throw new Error();
-      const blob = await res.blob();
-      const ext  = url.split('.').pop().split('?')[0] || 'pdf';
-      const a    = document.createElement('a');
-      a.href     = URL.createObjectURL(blob);
-      a.download = filename + '.' + ext;
-      a.click();
-      URL.revokeObjectURL(a.href);
-      toast('✅ Download started!');
-    } catch {
-      window.open(url, '_blank');
-      toast('📄 Opened in new tab');
+  function downloadFile(url, filename) {
+    if (!url) { toast('❌ No file available'); return; }
+
+    // For Cloudinary URLs: inject fl_attachment transformation for forced download
+    // This tells Cloudinary to serve the file as a download, not inline
+    let downloadUrl = url;
+    if (url.includes('cloudinary.com')) {
+      // Insert fl_attachment into the Cloudinary URL transformation chain
+      // e.g. .../upload/v123/file.pdf → .../upload/fl_attachment/v123/file.pdf
+      downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
     }
+
+    // Open download URL in a new tab — browser will prompt save dialog
+    const a    = document.createElement('a');
+    a.href     = downloadUrl;
+    a.target   = '_blank';
+    a.rel      = 'noopener noreferrer';
+    // Try setting download attribute (works same-origin, harmless cross-origin)
+    const ext  = url.split('.').pop().split('?')[0] || 'pdf';
+    a.download = filename + '.' + ext;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast('⬇ Download starting...');
   }
 
   function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); currentPaper = null; }
@@ -1868,3 +1921,4 @@
 </script>
 </body>
 </html>
+
