@@ -3,838 +3,763 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PastPapers RIUC</title>
+  <title>PastPapers — RIUC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy: #0A1628;
-      --navy2: #111f3a;
-      --gold: #F5C842;
-      --gold2: #FFE07D;
-      --purple: #7C3AED;
-      --pink: #EC4899;
-      --teal: #06B6D4;
-      --bg: #0A1628;
-      --bg2: rgba(255,255,255,0.04);
-      --bg3: rgba(255,255,255,0.08);
-      --glass: rgba(255,255,255,0.06);
-      --glass-border: rgba(255,255,255,0.12);
-      --glass-hover: rgba(255,255,255,0.1);
-      --t1: #F8FAFC;
-      --t2: #94A3B8;
-      --t3: #64748B;
-      --r: 12px;
-      --rl: 18px;
-      --rxl: 24px;
+      /* RIUC brand colors */
+      --riuc-blue:   #1A56DB;
+      --riuc-blue2:  #1E40AF;
+      --riuc-green:  #16A34A;
+      --riuc-yellow: #FBBF24;
+      --riuc-white:  #F8FAFC;
+
+      /* Dark mode (default) */
+      --bg:          #080F1E;
+      --bg2:         rgba(255,255,255,0.04);
+      --bg3:         rgba(255,255,255,0.08);
+      --card:        rgba(255,255,255,0.055);
+      --card-hover:  rgba(255,255,255,0.09);
+      --border:      rgba(255,255,255,0.1);
+      --border-hi:   rgba(26,86,219,0.4);
+      --t1:          #F1F5F9;
+      --t2:          #94A3B8;
+      --t3:          #475569;
+      --shadow:      0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg:   0 12px 40px rgba(0,0,0,0.5);
+      --r:           12px;
+      --rl:          18px;
+      --rxl:         24px;
     }
+
+    /* ── LIGHT MODE ── */
+    body.light {
+      --bg:         #F0F4FF;
+      --bg2:        rgba(0,0,0,0.04);
+      --bg3:        rgba(0,0,0,0.07);
+      --card:       rgba(255,255,255,0.75);
+      --card-hover: rgba(255,255,255,0.95);
+      --border:     rgba(0,0,0,0.09);
+      --border-hi:  rgba(26,86,219,0.3);
+      --t1:         #0A1628;
+      --t2:         #3D5280;
+      --t3:         #7A90C0;
+      --shadow:     0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg:  0 12px 36px rgba(0,0,0,0.12);
+      background:   #EEF2FF;
+    }
+    body.light .orb { opacity: 0.05 !important; }
+    body.light .header { background: rgba(240,244,255,0.88); }
+    body.light .bottom-nav { background: rgba(235,240,255,0.92); }
+    body.light .modal-inner, body.light .modal { background: #F5F8FF; }
+    body.light .form-input, body.light .search-input, body.light .comment-input { background: #fff; color: var(--t1); }
+    body.light .filter-pill { background: rgba(255,255,255,0.8); color: var(--t1); }
+    body.light .filter-pill option { background: #fff; }
+    body.light .skeleton { background: linear-gradient(90deg,rgba(0,0,0,0.06) 25%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.06) 75%); background-size:200% 100%; }
+    body.light .toast { background: rgba(248,250,255,0.96); color: var(--t1); }
 
     html, body { height: 100%; }
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--navy);
+      background: var(--bg);
       color: var(--t1);
       min-height: 100vh;
       overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
     }
 
-    /* ── ANIMATED BACKGROUND ── */
-    .bg-orbs {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-    }
+    /* ── BG GRADIENT ORBS ── */
+    .bg-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
     .orb {
-      position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.10;
-      animation: float 12s ease-in-out infinite;
+      position: absolute; border-radius: 50%;
+      filter: blur(100px); opacity: 0.12;
+      animation: drift 18s ease-in-out infinite;
     }
-    .orb-1 { width: 500px; height: 500px; background: var(--purple); top: -200px; right: -100px; animation-delay: 0s; }
-    .orb-2 { width: 400px; height: 400px; background: var(--teal); bottom: -150px; left: -100px; animation-delay: -4s; }
-    .orb-3 { width: 300px; height: 300px; background: var(--gold); top: 40%; left: 30%; animation-delay: -8s; }
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(15px, -15px) scale(1.02); }
-      66% { transform: translate(-10px, 10px) scale(0.98); }
+    .orb-1 { width: 550px; height: 550px; background: var(--riuc-blue);  top:-180px; right:-120px; animation-delay:0s; }
+    .orb-2 { width: 420px; height: 420px; background: var(--riuc-green); bottom:-140px; left:-100px; animation-delay:-6s; }
+    .orb-3 { width: 280px; height: 280px; background: var(--riuc-yellow); top:45%; left:35%; animation-delay:-12s; opacity:0.07; }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(20px,-20px) scale(1.03); }
+      66%      { transform: translate(-15px,15px) scale(0.97); }
     }
 
     /* ── LAYOUT ── */
     .app { max-width: 680px; margin: 0 auto; padding: 0 1rem 6rem; position: relative; z-index: 1; }
 
-    /* ── GLASS CARD ── */
+    /* ── GLASS MIXIN ── */
     .glass {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
+      background: var(--card);
+      border: 1px solid var(--border);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--rl);
     }
-    .glass:hover { background: var(--glass-hover); }
 
     /* ── HEADER ── */
     .header {
-      background: rgba(10,22,40,0.8);
-      border: 1px solid var(--glass-border);
+      background: rgba(8,15,30,0.82);
+      border: 1px solid var(--border);
       backdrop-filter: blur(30px);
       border-radius: var(--rxl);
-      padding: 1rem 1.25rem;
-      margin: 1rem 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 1rem;
-      z-index: 50;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      animation: slideDown 0.5s cubic-bezier(0.34,1.56,0.64,1);
+      padding: 0.85rem 1.1rem;
+      margin: 0.9rem 0;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0.9rem; z-index: 50;
+      box-shadow: var(--shadow);
+      animation: slideDown 0.45s ease;
     }
-    @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideDown { from{transform:translateY(-12px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-left { display: flex; align-items: center; gap: 9px; }
     .logo {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--gold), var(--purple));
+      width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--riuc-blue), var(--riuc-green));
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: #fff;
-      transition: transform 0.3s ease;
-      box-shadow: 0 4px 12px rgba(124,58,237,0.4);
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: #fff;
+      box-shadow: 0 3px 10px rgba(26,86,219,0.4);
+      transition: transform 0.3s;
     }
-    .logo:hover { transform: rotate(10deg) scale(1.1); }
-    .site-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--t1); }
-    .site-sub { font-size: 10px; color: var(--t3); margin-top: 1px; }
+    .logo:hover { transform: rotate(8deg) scale(1.08); }
+    .site-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--t1); }
+    .site-sub  { font-size: 10px; color: var(--t3); }
 
-    .header-right { display: flex; align-items: center; gap: 8px; }
-    .header-stat {
-      background: var(--bg2);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 11px;
-      color: var(--t2);
+    .header-right { display: flex; align-items: center; gap: 6px; }
+    .hdr-chip {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 9px;
+      font-size: 11px; color: var(--t2);
       display: flex; align-items: center; gap: 4px;
     }
-    .header-stat span { color: var(--gold); font-weight: 600; }
-
-    .theme-btn {
-      width: 34px; height: 34px; border-radius: 10px;
-      background: var(--bg2); border: 1px solid var(--glass-border);
-      color: var(--t2); cursor: pointer; font-size: 15px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; flex-shrink: 0;
-    }
-    .theme-btn:hover { background: var(--bg3); color: var(--gold); transform: scale(1.05); }
-
-    /* ── HERO ── */
-    .hero {
-      text-align: center;
-      padding: 2.5rem 1rem 2rem;
-      animation: fadeUp 0.6s ease 0.2s both;
-    }
-    @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.25);
-      border-radius: 20px; padding: 4px 12px;
-      font-size: 11px; font-weight: 500; color: var(--gold);
-      margin-bottom: 1rem; letter-spacing: 0.5px;
-    }
-    .hero-badge::before { content: ''; }
-
-    .hero h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: clamp(1.8rem, 5vw, 2.4rem);
-      font-weight: 800;
-      line-height: 1.15;
-      color: var(--t1);
-      margin-bottom: 0.6rem;
-    }
-    .hero h1 .grad {
-      background: linear-gradient(135deg, var(--gold), var(--purple), var(--teal));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero p { font-size: 14px; color: var(--t2); line-height: 1.6; max-width: 400px; margin: 0 auto 1.5rem; }
-
-    .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--gold), #e6b800);
-      color: var(--navy);
-      border: none; border-radius: var(--r);
-      padding: 10px 20px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.25s;
-      box-shadow: 0 4px 16px rgba(245,200,66,0.35);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,200,66,0.45); }
-    .btn-primary:active { transform: translateY(0); }
-    .btn-ghost {
-      background: var(--bg2); border: 1px solid var(--glass-border);
-      color: var(--t1); border-radius: var(--r);
-      padding: 10px 20px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px; font-weight: 500;
-      cursor: pointer; transition: all 0.25s;
-    }
-    .btn-ghost:hover { background: var(--bg3); border-color: var(--t3); transform: translateY(-1px); }
-
-    /* ── SEARCH BAR ── */
-    .search-wrap {
-      position: relative; margin-bottom: 1rem;
-      animation: fadeUp 0.6s ease 0.3s both;
-    }
-    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
-    .search-input {
-      width: 100%;
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--rl);
-      padding: 13px 14px 13px 42px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px; color: var(--t1);
-      outline: none;
-      transition: all 0.25s;
-      backdrop-filter: blur(20px);
-    }
-    .search-input::placeholder { color: var(--t3); }
-    .search-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,200,66,0.12); background: var(--glass-hover); }
-
-    /* ── FILTERS ── */
-    .filters {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem;
-      animation: fadeUp 0.6s ease 0.35s both;
-    }
-    .filter-select {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 6px 12px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px; color: var(--t1);
-      outline: none; cursor: pointer;
-      backdrop-filter: blur(10px);
-      transition: all 0.2s;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-    .filter-select:focus, .filter-select:hover { border-color: var(--gold); color: var(--gold); }
-    .filter-select option { background: #1a2a4a; color: var(--t1); }
-
-    /* ── SECTION LABEL ── */
-    .section-label {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 0.75rem;
-      animation: fadeUp 0.6s ease 0.4s both;
-    }
-    .section-label h2 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--t2); letter-spacing: 0.5px; text-transform: uppercase; }
-    .section-label span { font-size: 12px; color: var(--t3); }
-
-    /* ── PAPER CARD ── */
-    .paper-card {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--rl);
-      padding: 1rem 1.1rem;
-      margin-bottom: 10px;
-      backdrop-filter: blur(20px);
-      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      cursor: pointer;
-      animation: cardIn 0.4s ease both;
-      position: relative;
-      overflow: hidden;
-    }
-    .paper-card::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(245,200,66,0.03), transparent);
-      opacity: 0; transition: opacity 0.3s;
-    }
-    .paper-card:hover { transform: translateY(-3px); border-color: rgba(245,200,66,0.3); box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
-    .paper-card:hover::before { opacity: 1; }
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .pc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-    .pc-code {
-      display: inline-flex; align-items: center;
-      background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.2);
-      border-radius: 8px; padding: 3px 8px;
-      font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
-      color: var(--gold); letter-spacing: 0.5px; flex-shrink: 0;
-    }
-    .pc-type-badge {
-      font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
-      flex-shrink: 0;
-    }
-    .type-final { background: rgba(236,72,153,0.15); color: #f472b6; border: 1px solid rgba(236,72,153,0.2); }
-    .type-mid   { background: rgba(6,182,212,0.15);  color: #22d3ee; border: 1px solid rgba(6,182,212,0.2); }
-    .type-resit { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2); }
-    .type-quiz  { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
-
-    .pc-name { font-weight: 600; font-size: 14px; color: var(--t1); line-height: 1.3; margin-bottom: 4px; }
-    .pc-meta { font-size: 12px; color: var(--t2); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .pc-meta-dot { color: var(--t3); }
-
-    .pc-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .pc-tag {
-      background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.2);
-      border-radius: 20px; padding: 2px 8px;
-      font-size: 10px; font-weight: 500; color: #a78bfa;
-    }
-
-    .pc-bottom {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 10px; padding-top: 10px;
-      border-top: 1px solid var(--glass-border);
-    }
-    .pc-actions { display: flex; gap: 6px; }
-    .icon-btn {
+    .hdr-chip b { color: var(--riuc-yellow); font-weight: 600; }
+    .icon-btn-sm {
       width: 32px; height: 32px; border-radius: 9px;
-      background: var(--bg2); border: 1px solid var(--glass-border);
+      background: var(--bg2); border: 1px solid var(--border);
       color: var(--t2); cursor: pointer; font-size: 14px;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.2s; position: relative;
     }
-    .icon-btn:hover { background: var(--bg3); color: var(--t1); transform: scale(1.1); }
-    .icon-btn.bookmarked { color: var(--gold); border-color: rgba(245,200,66,0.3); background: rgba(245,200,66,0.1); }
-    .icon-btn.upvoted   { color: #f472b6; border-color: rgba(236,72,153,0.3); background: rgba(236,72,153,0.1); }
+    .icon-btn-sm:hover { background: var(--bg3); color: var(--t1); }
 
-    .pc-stats { display: flex; gap: 12px; align-items: center; }
-    .pc-stat { font-size: 11px; color: var(--t3); display: flex; align-items: center; gap: 3px; }
-    .pc-stat.hot { color: #f472b6; }
+    /* ── VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; animation: fadeUp 0.3s ease; }
+    @keyframes fadeUp { from{transform:translateY(14px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-    /* ── DOWNLOAD BTN ── */
-    .btn-dl {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: linear-gradient(135deg, rgba(245,200,66,0.15), rgba(124,58,237,0.1));
-      border: 1px solid rgba(245,200,66,0.25);
-      color: var(--gold); border-radius: 9px;
-      padding: 6px 12px; font-size: 12px; font-weight: 500;
-      cursor: pointer; text-decoration: none;
-      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    /* ── HOMEPAGE HERO ── */
+    .hero {
+      padding: 1.75rem 0 1.25rem;
     }
-    .btn-dl:hover { background: rgba(245,200,66,0.2); transform: translateY(-1px); }
-
-    /* ── RATING STARS ── */
-    .stars { display: flex; gap: 2px; }
-    .star { font-size: 12px; color: var(--t3); cursor: pointer; transition: all 0.15s; }
-    .star.lit { color: var(--gold); text-shadow: 0 0 8px rgba(245,200,66,0.6); }
-    .star:hover { transform: scale(1.3); }
-
-    /* ── EMPTY STATE ── */
-    .empty {
-      text-align: center; padding: 3rem 1rem;
-      animation: fadeUp 0.4s ease;
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600; color: var(--riuc-blue);
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 6px;
     }
-    .empty-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
-    .empty h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--t1); margin-bottom: 0.5rem; }
-    .empty p { font-size: 13px; color: var(--t2); }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block; width: 20px; height: 2px;
+      background: var(--riuc-blue); border-radius: 1px;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.75rem, 5vw, 2.2rem);
+      font-weight: 800; line-height: 1.15; color: var(--t1);
+      margin-bottom: 0.65rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--riuc-blue), var(--riuc-green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p { font-size: 14px; color: var(--t2); line-height: 1.65; margin-bottom: 1.25rem; max-width: 420px; }
+    .hero-btns { display: flex; gap: 9px; flex-wrap: wrap; }
 
-    /* ── PAGINATION ── */
-    .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; }
-    .page-btn {
-      min-width: 34px; height: 34px; border-radius: 9px;
-      background: var(--glass); border: 1px solid var(--glass-border);
-      color: var(--t2); cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif;
-      display: flex; align-items: center; justify-content: center; padding: 0 8px;
+    .btn-primary {
+      background: var(--riuc-blue);
+      color: #fff; border: none; border-radius: var(--r);
+      padding: 10px 18px; font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: all 0.22s;
+      box-shadow: 0 4px 14px rgba(26,86,219,0.4);
+    }
+    .btn-primary:hover { background: var(--riuc-blue2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,86,219,0.5); }
+    .btn-ghost {
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--t1); border-radius: var(--r); padding: 10px 18px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.22s;
+    }
+    .btn-ghost:hover { background: var(--bg3); border-color: var(--t3); }
+
+    /* ── LIVE STATS BAR ── */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 10px; margin-bottom: 1.25rem;
+    }
+    .stat-tile {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1rem 0.75rem;
+      text-align: center; backdrop-filter: blur(14px);
+      transition: all 0.25s;
+    }
+    .stat-tile:hover { transform: translateY(-2px); border-color: var(--border-hi); box-shadow: var(--shadow); }
+    .stat-tile-num {
+      font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+      line-height: 1;
+    }
+    .stat-tile-num.blue   { color: var(--riuc-blue); }
+    .stat-tile-num.green  { color: var(--riuc-green); }
+    .stat-tile-num.yellow { color: var(--riuc-yellow); }
+    .stat-tile-label { font-size: 10px; color: var(--t3); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── ACTIVITY FEED ── */
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.8rem; margin-top: 1.5rem;
+    }
+    .section-head h2 {
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+      color: var(--t2); text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .section-head a { font-size: 12px; color: var(--riuc-blue); cursor: pointer; }
+    .section-head a:hover { text-decoration: underline; }
+
+    .feed-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.3s ease both;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-avatar {
+      width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #fff;
+    }
+    .feed-text { flex: 1; }
+    .feed-text strong { font-weight: 600; color: var(--t1); font-size: 13px; }
+    .feed-text span   { font-size: 12px; color: var(--t2); }
+    .feed-time { font-size: 11px; color: var(--t3); flex-shrink: 0; }
+    .feed-code {
+      display: inline-block; background: rgba(26,86,219,0.1);
+      border: 1px solid rgba(26,86,219,0.2); border-radius: 6px;
+      padding: 1px 6px; font-size: 11px; font-weight: 600; color: var(--riuc-blue);
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap { position: relative; margin-bottom: 0.9rem; }
+    .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
+    .search-input {
+      width: 100%; background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 12px 12px 12px 40px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--t1);
+      outline: none; transition: all 0.22s; backdrop-filter: blur(14px);
+    }
+    .search-input::placeholder { color: var(--t3); }
+    .search-input:focus { border-color: var(--riuc-blue); box-shadow: 0 0 0 3px rgba(26,86,219,0.12); }
+
+    /* ── FILTER PILLS ── */
+    .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 1.1rem; }
+    .filter-pill {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px; padding: 6px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--t2);
+      outline: none; cursor: pointer; backdrop-filter: blur(10px);
+      transition: all 0.2s; appearance: none; -webkit-appearance: none;
+    }
+    .filter-pill:hover, .filter-pill:focus { border-color: var(--riuc-blue); color: var(--riuc-blue); }
+    .filter-pill option { background: #0e1a2e; }
+
+    /* ── PAPER CARD ── */
+    .paper-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1rem 1.1rem;
+      margin-bottom: 9px; backdrop-filter: blur(18px);
+      transition: all 0.28s cubic-bezier(0.34,1.4,0.64,1);
+      cursor: pointer; position: relative; overflow: hidden;
+      animation: cardIn 0.35s ease both;
+    }
+    .paper-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(26,86,219,0.3);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+      background: var(--card-hover);
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    .pc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+    .pc-code {
+      display: inline-flex; align-items: center;
+      background: rgba(26,86,219,0.1); border: 1px solid rgba(26,86,219,0.2);
+      border-radius: 7px; padding: 3px 8px;
+      font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+      color: var(--riuc-blue); flex-shrink: 0;
+    }
+    .pc-type {
+      font-size: 10px; font-weight: 600; padding: 3px 8px;
+      border-radius: 20px; flex-shrink: 0;
+    }
+    .type-final { background: rgba(22,163,74,0.12); color: #22c55e; border: 1px solid rgba(22,163,74,0.2); }
+    .type-mid   { background: rgba(26,86,219,0.12); color: #60a5fa; border: 1px solid rgba(26,86,219,0.2); }
+    .type-resit { background: rgba(251,191,36,0.12); color: var(--riuc-yellow); border: 1px solid rgba(251,191,36,0.2); }
+    .type-quiz  { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+
+    .pc-name { font-weight: 600; font-size: 14px; color: var(--t1); line-height: 1.35; margin-bottom: 4px; }
+    .pc-meta { font-size: 12px; color: var(--t2); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .pc-dot  { color: var(--t3); }
+
+    .pc-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+    .pc-tag {
+      background: rgba(22,163,74,0.1); border: 1px solid rgba(22,163,74,0.2);
+      border-radius: 20px; padding: 2px 7px;
+      font-size: 10px; font-weight: 500; color: var(--riuc-green);
+    }
+
+    .pc-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+    }
+    .pc-actions { display: flex; gap: 6px; }
+    .icon-btn {
+      width: 31px; height: 31px; border-radius: 9px;
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--t2); cursor: pointer; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
       transition: all 0.2s;
     }
-    .page-btn:hover, .page-btn.active { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 600; transform: scale(1.05); }
+    .icon-btn:hover { background: var(--bg3); color: var(--t1); transform: scale(1.08); }
+    .icon-btn.bookmarked { color: var(--riuc-yellow); border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.08); }
+    .icon-btn.upvoted    { color: var(--riuc-green);  border-color: rgba(22,163,74,0.3);  background: rgba(22,163,74,0.08); }
+
+    .pc-stats { display: flex; gap: 10px; }
+    .pc-stat  { font-size: 11px; color: var(--t3); display: flex; align-items: center; gap: 3px; }
+    .pc-stat.hot { color: var(--riuc-yellow); }
 
     /* ── BOTTOM NAV ── */
     .bottom-nav {
-      position: fixed; bottom: 0; left: 50%;
-      transform: translateX(-50%);
-      width: min(460px, calc(100% - 2rem));
-      background: rgba(10,22,40,0.85);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(30px);
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: min(460px, calc(100% - 1.5rem));
+      background: rgba(8,15,30,0.88);
+      border: 1px solid var(--border); backdrop-filter: blur(28px);
       border-radius: var(--rxl) var(--rxl) 0 0;
-      padding: 10px 12px 16px;
-      display: flex; gap: 4px;
-      z-index: 50;
-      box-shadow: 0 -8px 32px rgba(0,0,0,0.4);
-      animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+      padding: 10px 10px 16px;
+      display: flex; gap: 3px; z-index: 50;
+      box-shadow: 0 -6px 28px rgba(0,0,0,0.35);
+      animation: slideUp 0.45s ease 0.2s both;
     }
-    @keyframes slideUp { from { transform: translateX(-50%) translateY(100%); } to { transform: translateX(-50%) translateY(0); } }
+    @keyframes slideUp { from{transform:translateX(-50%) translateY(100%)} to{transform:translateX(-50%) translateY(0)} }
+
     .nav-btn {
       flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
       background: none; border: none; color: var(--t3);
       cursor: pointer; padding: 6px 4px; border-radius: var(--r);
       font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 500;
-      transition: all 0.25s; letter-spacing: 0.3px;
+      transition: all 0.22s; letter-spacing: 0.3px; position: relative;
     }
-    .nav-btn .nav-icon { font-size: 19px; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    .nav-icon { font-size: 18px; transition: transform 0.28s cubic-bezier(0.34,1.5,0.64,1); }
     .nav-btn:hover { color: var(--t2); }
-    .nav-btn:hover .nav-icon { transform: translateY(-3px); }
-    .nav-btn.active { color: var(--gold); }
-    .nav-btn.active .nav-icon { transform: translateY(-3px); filter: drop-shadow(0 2px 6px rgba(245,200,66,0.5)); }
+    .nav-btn:hover .nav-icon { transform: translateY(-2px); }
+    .nav-btn.active { color: var(--riuc-blue); }
+    .nav-btn.active .nav-icon { transform: translateY(-3px); filter: drop-shadow(0 2px 6px rgba(26,86,219,0.5)); }
+    .nav-dot {
+      position: absolute; top: 4px; right: calc(50% - 14px);
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--riuc-green); border: 1.5px solid var(--bg);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:0.7} }
 
-    /* ── VIEWS ── */
-    .view { display: none; animation: fadeUp 0.35s ease; }
-    .view.active { display: block; }
-
-    /* ── MODAL ── */
+    /* ── MODAL SHEET ── */
     .modal-bg {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); z-index: 100;
+      background: rgba(0,0,0,0.55); z-index: 100;
       align-items: flex-end; justify-content: center;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(6px);
     }
-    .modal-bg.open { display: flex; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+    .modal-bg.open { display: flex; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     .modal {
-      background: #111f3a;
-      border: 1px solid var(--glass-border);
+      background: #0e1928; border: 1px solid var(--border);
       border-radius: var(--rxl) var(--rxl) 0 0;
-      padding: 1.5rem 1.25rem 2rem;
-      width: 100%; max-width: 520px;
-      max-height: 85vh; overflow-y: auto;
-      animation: sheetUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      padding: 1.4rem 1.2rem 2rem;
+      width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
+      animation: sheetUp 0.38s cubic-bezier(0.34,1.4,0.64,1);
     }
-    @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .modal-handle { width: 36px; height: 4px; background: var(--bg3); border-radius: 2px; margin: 0 auto 1.25rem; }
-    .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--t1); margin-bottom: 1.25rem; }
+    @keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .modal-handle { width: 34px; height: 4px; background: var(--bg3); border-radius: 2px; margin: 0 auto 1.1rem; }
+    .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--t1); margin-bottom: 1.1rem; }
 
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--t2); margin-bottom: 6px; }
+    /* ── FORM ── */
+    .form-group { margin-bottom: 13px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--t2); margin-bottom: 5px; }
     .form-input {
-      width: 100%; background: var(--bg2);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r); padding: 11px 13px;
+      width: 100%; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 10px 12px;
       font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--t1);
       outline: none; transition: all 0.2s;
     }
-    .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,200,66,0.1); }
+    .form-input:focus { border-color: var(--riuc-blue); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
     .form-input::placeholder { color: var(--t3); }
-    .form-input option { background: #1a2a4a; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-input option { background: #0e1928; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
     .upload-zone {
-      border: 1.5px dashed var(--glass-border);
-      border-radius: var(--r); padding: 1.5rem;
-      text-align: center; font-size: 13px; color: var(--t3);
-      cursor: pointer; transition: all 0.3s;
-      background: var(--bg2);
+      border: 1.5px dashed var(--border); border-radius: var(--r);
+      padding: 1.4rem; text-align: center; font-size: 13px; color: var(--t3);
+      cursor: pointer; transition: all 0.25s; background: var(--bg2);
     }
-    .upload-zone:hover, .upload-zone.dragover { border-color: var(--gold); color: var(--t1); background: rgba(245,200,66,0.05); }
-    .upload-zone.has-file { border-color: #4ade80; color: #4ade80; background: rgba(74,222,128,0.05); }
+    .upload-zone:hover, .upload-zone.dragover { border-color: var(--riuc-blue); color: var(--t1); background: rgba(26,86,219,0.05); }
+    .upload-zone.has-file { border-color: var(--riuc-green); color: var(--riuc-green); background: rgba(22,163,74,0.05); }
 
-    .tag-grid { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
     .tag-chip {
-      background: var(--bg2); border: 1px solid var(--glass-border);
-      border-radius: 20px; padding: 5px 12px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 5px 11px;
       font-size: 11px; font-weight: 500; color: var(--t2);
-      cursor: pointer; transition: all 0.2s;
+      cursor: pointer; transition: all 0.18s;
     }
-    .tag-chip.on { background: rgba(124,58,237,0.2); border-color: rgba(124,58,237,0.4); color: #a78bfa; }
+    .tag-chip.on { background: rgba(22,163,74,0.15); border-color: rgba(22,163,74,0.35); color: var(--riuc-green); }
 
-    .modal-btns { display: flex; gap: 8px; margin-top: 1.25rem; }
+    .modal-btns { display: flex; gap: 8px; margin-top: 1.1rem; }
     .btn-cancel {
-      flex: 1; background: var(--bg2); border: 1px solid var(--glass-border);
-      color: var(--t2); border-radius: var(--r); padding: 12px;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s;
+      flex: 1; background: var(--bg2); border: 1px solid var(--border);
+      color: var(--t2); border-radius: var(--r); padding: 11px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
     }
     .btn-cancel:hover { background: var(--bg3); }
     .btn-submit {
-      flex: 2; background: linear-gradient(135deg, var(--gold), #e6b800);
-      color: var(--navy); border: none; border-radius: var(--r); padding: 12px;
+      flex: 2; background: var(--riuc-blue); color: #fff;
+      border: none; border-radius: var(--r); padding: 11px;
       font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
       cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(245,200,66,0.3);
+      box-shadow: 0 4px 14px rgba(26,86,219,0.35);
     }
-    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,200,66,0.4); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-submit:hover { background: var(--riuc-blue2); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-    .alert {
-      border-radius: var(--r); padding: 10px 13px;
-      font-size: 12px; margin-bottom: 12px; font-weight: 500;
-    }
-    .alert-error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
-    .alert-success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: #4ade80; }
+    .alert { border-radius: var(--r); padding: 9px 12px; font-size: 12px; margin-bottom: 11px; font-weight: 500; }
+    .alert-error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.25);  color: #f87171; }
+    .alert-success { background: rgba(22,163,74,0.1);  border: 1px solid rgba(22,163,74,0.25);  color: #4ade80; }
 
-    /* ── AUTH VIEW ── */
+    /* ── AUTH CARD ── */
     .auth-card {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: var(--rxl); padding: 2rem 1.5rem;
-      backdrop-filter: blur(20px); max-width: 420px; margin: 2rem auto;
-      animation: fadeUp 0.4s ease;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rxl); padding: 1.75rem 1.4rem;
+      backdrop-filter: blur(18px); max-width: 420px; margin: 2rem auto;
     }
-    .auth-card h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--t1); margin-bottom: 0.4rem; }
-    .auth-card p  { font-size: 13px; color: var(--t2); margin-bottom: 1.5rem; }
-    .auth-toggle { text-align: center; font-size: 12px; color: var(--t2); margin-top: 1.25rem; }
-    .auth-toggle a { color: var(--gold); cursor: pointer; font-weight: 600; }
-    .auth-toggle a:hover { text-decoration: underline; }
+    .auth-card h2 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--t1); margin-bottom: 0.3rem; }
+    .auth-card p  { font-size: 13px; color: var(--t2); margin-bottom: 1.4rem; }
+    .auth-toggle  { text-align: center; font-size: 12px; color: var(--t2); margin-top: 1.1rem; }
+    .auth-toggle a { color: var(--riuc-blue); cursor: pointer; font-weight: 600; }
 
-    /* ── PROFILE ── */
-    .profile-hero {
-      text-align: center; padding: 2rem 1rem 1.5rem;
-      animation: fadeUp 0.4s ease;
+    /* ── DASHBOARD ── */
+    .dash-hero {
+      background: linear-gradient(135deg, var(--riuc-blue), var(--riuc-green));
+      border-radius: var(--rxl); padding: 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 1rem; position: relative; overflow: hidden;
     }
-    .avatar {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold), var(--purple));
+    .dash-hero::after {
+      content: ''; position: absolute; right: -30px; top: -30px;
+      width: 140px; height: 140px; border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+    }
+    .dash-avatar {
+      width: 60px; height: 60px; border-radius: 16px; flex-shrink: 0;
+      background: rgba(255,255,255,0.2);
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #fff;
-      margin: 0 auto 1rem;
-      box-shadow: 0 8px 24px rgba(124,58,237,0.4);
-      transition: transform 0.3s;
+      font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff;
+      border: 2px solid rgba(255,255,255,0.3);
     }
-    .avatar:hover { transform: scale(1.05) rotate(-3deg); }
-    .profile-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--t1); }
-    .profile-meta { font-size: 12px; color: var(--t2); margin-top: 4px; }
-    .profile-stats {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 10px; margin: 1.25rem 0;
+    .dash-name { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: #fff; }
+    .dash-sub  { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 3px; }
+    .dash-level {
+      margin-top: 7px; display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.2); border-radius: 20px;
+      padding: 3px 10px; font-size: 11px; font-weight: 600; color: #fff;
     }
-    .p-stat {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: var(--rl); padding: 1rem 0.5rem; text-align: center;
-      backdrop-filter: blur(10px);
-    }
-    .p-stat-n { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--gold); }
-    .p-stat-l { font-size: 10px; color: var(--t3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .logout-btn {
-      width: 100%; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
-      color: #f87171; border-radius: var(--rl); padding: 13px;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+    .dash-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin-bottom: 1rem; }
+    .dash-stat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 0.9rem 0.5rem; text-align: center;
+      backdrop-filter: blur(12px);
     }
-    .logout-btn:hover { background: rgba(239,68,68,0.2); }
+    .dash-stat-n { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--riuc-yellow); }
+    .dash-stat-l { font-size: 10px; color: var(--t3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
 
-    /* ── BOOKMARKS VIEW ── */
-    .bookmarks-header {
+    /* ── XP BAR ── */
+    .xp-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1rem 1.1rem;
+      margin-bottom: 1rem; backdrop-filter: blur(12px);
+    }
+    .xp-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .xp-label { font-size: 13px; font-weight: 600; color: var(--t1); }
+    .xp-pts   { font-size: 12px; color: var(--riuc-yellow); font-weight: 600; }
+    .xp-track {
+      width: 100%; height: 7px; background: var(--bg3);
+      border-radius: 4px; overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--riuc-blue), var(--riuc-green));
+      border-radius: 4px; transition: width 1s cubic-bezier(0.34,1.4,0.64,1);
+    }
+    .xp-next { font-size: 11px; color: var(--t3); margin-top: 5px; }
+
+    /* ── BADGES ── */
+    .badges-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-bottom: 1rem; }
+    .badge-tile {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 0.85rem 0.5rem; text-align: center;
+      backdrop-filter: blur(10px); transition: all 0.25s;
+    }
+    .badge-tile:hover { transform: translateY(-2px); }
+    .badge-tile.locked { opacity: 0.4; filter: grayscale(1); }
+    .badge-icon { font-size: 1.6rem; margin-bottom: 5px; }
+    .badge-name { font-size: 10px; font-weight: 600; color: var(--t2); }
+
+    /* ── LEADERBOARD ── */
+    .lb-item {
       display: flex; align-items: center; gap: 10px;
-      margin-bottom: 1.25rem; padding-top: 1rem;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
     }
-    .bookmarks-header h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+    .lb-item:last-child { border-bottom: none; }
+    .lb-rank {
+      width: 26px; text-align: center; flex-shrink: 0;
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800;
+    }
+    .lb-rank.gold   { color: var(--riuc-yellow); }
+    .lb-rank.silver { color: #CBD5E1; }
+    .lb-rank.bronze { color: #CD7C45; }
+    .lb-rank.other  { color: var(--t3); }
+    .lb-av {
+      width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff;
+    }
+    .lb-name  { flex: 1; font-size: 13px; font-weight: 500; color: var(--t1); }
+    .lb-dept  { font-size: 11px; color: var(--t3); margin-top: 2px; }
+    .lb-pts   { font-size: 12px; font-weight: 700; color: var(--riuc-yellow); flex-shrink: 0; }
 
-    /* ── ADMIN PANEL ── */
-    .admin-hero {
-      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(245,200,66,0.1));
-      border: 1px solid rgba(124,58,237,0.25);
-      border-radius: var(--rxl); padding: 1.25rem 1.5rem;
-      margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;
-      backdrop-filter: blur(20px);
+    /* ── ADMIN ── */
+    .admin-top {
+      background: linear-gradient(135deg, rgba(26,86,219,0.15), rgba(22,163,74,0.08));
+      border: 1px solid rgba(26,86,219,0.2); border-radius: var(--rxl);
+      padding: 1.1rem 1.3rem; margin-bottom: 1rem;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .admin-hero h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--t1); }
-    .admin-hero p { font-size: 12px; color: var(--t2); margin-top: 3px; }
-    .admin-pill {
-      background: rgba(245,200,66,0.15); border: 1px solid rgba(245,200,66,0.3);
-      border-radius: 20px; padding: 5px 12px;
-      font-size: 11px; font-weight: 700; color: var(--gold); flex-shrink: 0;
-    }
-
-    .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+    .admin-top h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--t1); }
+    .admin-top p  { font-size: 12px; color: var(--t2); margin-top: 3px; }
+    .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.1rem; }
     .a-tab {
-      flex: 1; background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: var(--r); padding: 9px 8px;
+      flex: 1; background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 8px;
       font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--t2);
       cursor: pointer; text-align: center; transition: all 0.2s;
     }
-    .a-tab.active, .a-tab:hover { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.3); color: var(--gold); }
+    .a-tab.active, .a-tab:hover { background: rgba(26,86,219,0.12); border-color: rgba(26,86,219,0.3); color: var(--riuc-blue); }
 
-    .admin-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+    .admin-stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 9px; margin-bottom: 1rem; }
     .a-stat {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: var(--rl); padding: 1.1rem; text-align: center;
-      backdrop-filter: blur(10px); transition: all 0.3s;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1rem; text-align: center; backdrop-filter: blur(10px);
     }
-    .a-stat:hover { transform: translateY(-2px); border-color: var(--glass-border); }
-    .a-stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; }
-    .a-stat-num.gold   { color: var(--gold); text-shadow: 0 0 20px rgba(245,200,66,0.4); }
-    .a-stat-num.purple { color: #a78bfa; text-shadow: 0 0 20px rgba(124,58,237,0.4); }
-    .a-stat-num.teal   { color: #22d3ee; text-shadow: 0 0 20px rgba(6,182,212,0.4); }
-    .a-stat-num.pink   { color: #f472b6; text-shadow: 0 0 20px rgba(236,72,153,0.4); }
-    .a-stat-label { font-size: 11px; color: var(--t3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .a-stat-num { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; }
+    .a-stat-num.blue   { color: var(--riuc-blue); }
+    .a-stat-num.green  { color: var(--riuc-green); }
+    .a-stat-num.yellow { color: var(--riuc-yellow); }
+    .a-stat-num.red    { color: #f87171; }
+    .a-stat-label { font-size: 11px; color: var(--t3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
 
     .pending-item {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: var(--rl); padding: 1rem 1.1rem; margin-bottom: 10px;
-      backdrop-filter: blur(10px); transition: all 0.3s;
-      animation: cardIn 0.3s ease both;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1rem; margin-bottom: 9px;
+      backdrop-filter: blur(10px); animation: cardIn 0.3s ease both;
     }
-    .pending-item:hover { border-color: rgba(245,200,66,0.2); }
-    .pi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
-    .pi-title { font-weight: 600; font-size: 14px; color: var(--t1); }
-    .pi-meta  { font-size: 11px; color: var(--t2); margin-top: 3px; }
-    .pi-actions { display: flex; gap: 7px; margin-top: 12px; flex-wrap: wrap; }
-
+    .pending-item:hover { border-color: rgba(26,86,219,0.25); }
+    .pi-title { font-weight: 600; font-size: 14px; color: var(--t1); margin-bottom: 3px; }
+    .pi-meta  { font-size: 11px; color: var(--t2); }
+    .pi-actions { display: flex; gap: 7px; margin-top: 11px; flex-wrap: wrap; }
     .btn-approve {
-      background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.3);
-      color: #4ade80; border-radius: var(--r); padding: 7px 14px;
+      background: rgba(22,163,74,0.12); border: 1px solid rgba(22,163,74,0.25);
+      color: #4ade80; border-radius: var(--r); padding: 7px 13px;
       font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
       cursor: pointer; transition: all 0.2s;
     }
-    .btn-approve:hover { background: rgba(74,222,128,0.25); transform: translateY(-1px); }
+    .btn-approve:hover { background: rgba(22,163,74,0.22); }
     .btn-reject {
-      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
-      color: #f87171; border-radius: var(--r); padding: 7px 14px;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      color: #f87171; border-radius: var(--r); padding: 7px 13px;
       font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
       cursor: pointer; transition: all 0.2s;
     }
-    .btn-reject:hover { background: rgba(239,68,68,0.2); transform: translateY(-1px); }
-    .btn-view {
-      background: var(--bg2); border: 1px solid var(--glass-border);
-      color: var(--t2); border-radius: var(--r); padding: 7px 14px;
-      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
-      cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
+    .btn-reject:hover { background: rgba(239,68,68,0.18); }
+    .btn-viewfile {
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--t2); border-radius: var(--r); padding: 7px 13px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer;
+      text-decoration: none; display: inline-block; transition: all 0.2s;
     }
-    .btn-view:hover { border-color: var(--t3); color: var(--t1); }
+    .btn-viewfile:hover { border-color: var(--t3); color: var(--t1); }
 
     .user-item {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 11px 0; border-bottom: 1px solid var(--glass-border);
+      padding: 10px 0; border-bottom: 1px solid var(--border);
     }
     .user-item:last-child { border-bottom: none; }
-    .ui-avatar {
-      width: 34px; height: 34px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--purple), var(--teal));
+    .ui-left { display: flex; align-items: center; gap: 9px; }
+    .ui-av {
+      width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--riuc-blue), var(--riuc-green));
       display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff;
-      flex-shrink: 0; margin-right: 10px;
+      font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: #fff;
     }
     .ui-name  { font-size: 13px; font-weight: 500; color: var(--t1); }
-    .ui-email { font-size: 11px; color: var(--t2); margin-top: 2px; }
-    .badge {
-      font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; flex-shrink: 0;
+    .ui-email { font-size: 11px; color: var(--t2); margin-top: 1px; }
+    .role-badge {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
     }
-    .badge-admin   { background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.25); color: var(--gold); }
-    .badge-student { background: var(--bg2); border: 1px solid var(--glass-border); color: var(--t3); }
+    .role-admin   { background: rgba(26,86,219,0.12); border: 1px solid rgba(26,86,219,0.25); color: var(--riuc-blue); }
+    .role-student { background: var(--bg2); border: 1px solid var(--border); color: var(--t3); }
 
-    .section-title {
-      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-      color: var(--t2); text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 0.9rem;
+    /* ── PAPER PREVIEW MODAL ── */
+    .preview-wrap { margin-bottom: 1rem; border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); }
+    .preview-pdf  { width: 100%; height: 400px; border: none; display: block; background: #111; }
+    .preview-img  { width: 100%; max-height: 400px; object-fit: contain; display: block; background: #111; }
+    .preview-tabs { display: flex; gap: 6px; margin-bottom: 9px; }
+    .ptab {
+      flex: 1; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 7px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      color: var(--t2); cursor: pointer; text-align: center; transition: all 0.2s;
     }
+    .ptab.active { background: rgba(26,86,219,0.12); border-color: rgba(26,86,219,0.3); color: var(--riuc-blue); }
 
-    /* ── COMMENTS ── */
-    .comment-item {
-      background: var(--bg2); border: 1px solid var(--glass-border);
-      border-radius: var(--r); padding: 10px 12px; margin-bottom: 8px;
+    .detail-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 1rem; }
+    .dl-btns { display: flex; gap: 7px; margin-bottom: 1.1rem; flex-wrap: wrap; }
+    .btn-dl {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--riuc-blue); color: #fff; border: none;
+      border-radius: var(--r); padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      box-shadow: 0 3px 10px rgba(26,86,219,0.35);
     }
-    .comment-author { font-size: 11px; font-weight: 600; color: var(--gold); margin-bottom: 4px; }
+    .btn-dl:hover { background: var(--riuc-blue2); transform: translateY(-1px); }
+    .btn-dl-out {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--bg2); border: 1px solid var(--border);
+      color: var(--t1); border-radius: var(--r); padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-dl-out:hover { border-color: var(--riuc-blue); color: var(--riuc-blue); }
+
+    .stars { display: flex; gap: 3px; }
+    .star  { font-size: 16px; color: var(--t3); cursor: pointer; transition: all 0.15s; }
+    .star.lit { color: var(--riuc-yellow); text-shadow: 0 0 8px rgba(251,191,36,0.5); }
+    .star:hover { transform: scale(1.25); }
+
+    .comment-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 9px 11px; margin-bottom: 7px; }
+    .comment-author { font-size: 11px; font-weight: 600; color: var(--riuc-blue); margin-bottom: 3px; }
     .comment-text   { font-size: 13px; color: var(--t2); line-height: 1.5; }
-    .comment-input-wrap { display: flex; gap: 8px; margin-top: 10px; }
-    .comment-input {
-      flex: 1; background: var(--bg2); border: 1px solid var(--glass-border);
-      border-radius: var(--r); padding: 9px 12px;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--t1);
-      outline: none;
+    .comment-row    { display: flex; gap: 7px; margin-top: 9px; }
+    .comment-input  {
+      flex: 1; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--r); padding: 9px 11px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--t1); outline: none;
     }
-    .comment-input:focus { border-color: var(--gold); }
+    .comment-input:focus { border-color: var(--riuc-blue); }
     .comment-input::placeholder { color: var(--t3); }
     .btn-comment {
-      background: var(--gold); color: var(--navy); border: none;
-      border-radius: var(--r); padding: 9px 14px;
+      background: var(--riuc-blue); color: #fff; border: none;
+      border-radius: var(--r); padding: 9px 13px;
       font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
       cursor: pointer; transition: all 0.2s; flex-shrink: 0;
     }
-    .btn-comment:hover { transform: scale(1.03); }
+    .btn-comment:hover { background: var(--riuc-blue2); }
 
-    /* ── PAPER DETAIL MODAL ── */
-    .detail-modal { background: #0e1a2e; }
-    .detail-img {
-      width: 100%; aspect-ratio: 16/7;
-      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(245,200,66,0.1));
-      border-radius: var(--r); margin-bottom: 1rem;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 3rem;
-    }
-    .rating-section { margin: 1rem 0; }
-    .rating-label { font-size: 12px; color: var(--t2); margin-bottom: 6px; }
-
-    /* ── NOTIFICATIONS ── */
-    .notif-dot {
-      position: absolute; top: 2px; right: 2px;
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--pink); border: 1.5px solid var(--navy);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.7; }
-    }
-
-    .notif-panel {
-      background: #111f3a; border: 1px solid var(--glass-border);
-      border-radius: var(--rxl) var(--rxl) 0 0;
-      padding: 1.5rem 1.25rem 2rem;
-      animation: sheetUp 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .notif-item {
-      display: flex; gap: 10px; align-items: flex-start;
-      padding: 10px 0; border-bottom: 1px solid var(--glass-border);
-    }
-    .notif-item:last-child { border-bottom: none; }
-    .notif-icon {
-      width: 34px; height: 34px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
-    }
-    .notif-icon.approved { background: rgba(74,222,128,0.15); }
-    .notif-icon.rejected { background: rgba(239,68,68,0.15); }
-    .notif-icon.new      { background: rgba(6,182,212,0.15); }
-    .notif-text { font-size: 12px; color: var(--t2); line-height: 1.5; }
-    .notif-text strong { color: var(--t1); }
-    .notif-time { font-size: 10px; color: var(--t3); margin-top: 3px; }
-
-    /* ── LOADING ── */
+    /* ── SKELETON ── */
     .skeleton {
       background: linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: var(--r);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--r);
     }
-    @keyframes shimmer {
-      from { background-position: 200% 0; }
-      to   { background-position: -200% 0; }
+    @keyframes shimmer { from{background-position:200% 0} to{background-position:-200% 0} }
+
+    /* ── PAGINATION ── */
+    .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 1.1rem; flex-wrap: wrap; }
+    .pg-btn {
+      min-width: 33px; height: 33px; border-radius: 9px;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--t2); cursor: pointer; font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      display: flex; align-items: center; justify-content: center; padding: 0 8px;
+      transition: all 0.2s;
+    }
+    .pg-btn:hover, .pg-btn.active { background: var(--riuc-blue); color: #fff; border-color: var(--riuc-blue); font-weight: 600; }
+
+    /* ── EMPTY ── */
+    .empty { text-align: center; padding: 2.5rem 1rem; }
+    .empty-icon { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; }
+    .empty h3  { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--t1); margin-bottom: 0.4rem; }
+    .empty p   { font-size: 13px; color: var(--t2); }
+
+    /* ── SECTION TITLE ── */
+    .sec-title {
+      font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+      color: var(--t3); text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 0.8rem;
     }
 
     /* ── TOAST ── */
     .toast {
-      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: rgba(17,31,58,0.95); border: 1px solid var(--glass-border);
-      border-radius: 20px; padding: 10px 18px;
+      position: fixed; bottom: 88px; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(14,25,40,0.95); border: 1px solid var(--border);
+      border-radius: 20px; padding: 9px 16px;
       font-size: 13px; color: var(--t1); font-weight: 500;
       backdrop-filter: blur(20px); z-index: 200;
-      opacity: 0; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.4,0.64,1);
       pointer-events: none; white-space: nowrap;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      box-shadow: var(--shadow);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ── LOGOUT BTN ── */
+    .logout-btn {
+      width: 100%; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      color: #f87171; border-radius: var(--rl); padding: 12px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; margin-top: 0.5rem;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.18); }
 
-    /* ── PAPER PREVIEW ── */
-    .preview-container {
-      width: 100%; border-radius: var(--r); overflow: hidden;
-      background: #000; margin-bottom: 1rem;
-      border: 1px solid var(--glass-border);
-      position: relative;
-    }
-    .preview-pdf {
-      width: 100%; height: 420px; border: none; display: block;
-      background: #1a1a2e;
-    }
-    .preview-img {
-      width: 100%; max-height: 420px; object-fit: contain;
-      display: block; background: #1a1a2e;
-    }
-    .preview-tabs {
-      display: flex; gap: 6px; margin-bottom: 10px;
-    }
-    .preview-tab {
-      flex: 1; background: var(--bg2); border: 1px solid var(--glass-border);
-      border-radius: var(--r); padding: 8px;
-      font-family: "DM Sans", sans-serif; font-size: 12px; font-weight: 500;
-      color: var(--t2); cursor: pointer; text-align: center; transition: all 0.2s;
-    }
-    .preview-tab.active { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.3); color: var(--gold); }
-    .dl-btn-wrap { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-    .btn-dl-solid {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: linear-gradient(135deg, var(--gold), #e6b800);
-      color: var(--navy); border: none; border-radius: var(--r);
-      padding: 9px 16px; font-size: 13px; font-weight: 700;
-      cursor: pointer; font-family: "DM Sans", sans-serif;
-      transition: all 0.2s; text-decoration: none;
-      box-shadow: 0 4px 12px rgba(245,200,66,0.3);
-    }
-    .btn-dl-solid:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(245,200,66,0.4); }
-    .btn-dl-outline {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--bg2); border: 1px solid var(--glass-border);
-      color: var(--t1); border-radius: var(--r);
-      padding: 9px 16px; font-size: 13px; font-weight: 500;
-      cursor: pointer; font-family: "DM Sans", sans-serif;
-      transition: all 0.2s; text-decoration: none;
-    }
-    .btn-dl-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-1px); }
-    .preview-error {
-      padding: 2rem; text-align: center; color: var(--t3); font-size: 13px;
-      background: var(--bg2); border-radius: var(--r);
-    }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
 
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
-
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
-
-    /* ── LIGHT MODE ── */
-    body.light {
-      --navy: #F0F4FF;
-      --navy2: #E4EAFB;
-      --bg: #F0F4FF;
-      --bg2: rgba(0,0,0,0.04);
-      --bg3: rgba(0,0,0,0.08);
-      --glass: rgba(255,255,255,0.7);
-      --glass-border: rgba(0,0,0,0.1);
-      --glass-hover: rgba(255,255,255,0.85);
-      --t1: #0A1628;
-      --t2: #3D5280;
-      --t3: #7A90C0;
-      background: #EEF2FF;
-    }
-    body.light .bg-orbs .orb { opacity: 0.06; }
-    body.light .header {
-      background: rgba(240,244,255,0.85);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-    }
-    body.light .bottom-nav {
-      background: rgba(240,244,255,0.9);
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
-    }
-    body.light .modal, body.light .notif-panel, body.light .detail-modal {
-      background: #F8FAFF;
-    }
-    body.light .form-input, body.light .search-input, body.light .comment-input {
-      background: rgba(255,255,255,0.9);
-      color: #0A1628;
-    }
-    body.light .filter-select { background: rgba(255,255,255,0.8); color: #0A1628; }
-    body.light .filter-select option { background: #F0F4FF; color: #0A1628; }
-    body.light .paper-card { background: rgba(255,255,255,0.7); }
-    body.light .auth-card, body.light .pending-item, body.light .a-stat,
-    body.light .comment-item, body.light .p-stat { background: rgba(255,255,255,0.8); }
-    body.light .skeleton {
-      background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.06) 75%);
-      background-size: 200% 100%;
-    }
-    body.light .admin-hero {
-      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(245,200,66,0.06));
-    }
-    body.light .preview-container { background: #fff; }
-    body.light .toast {
-      background: rgba(240,244,255,0.95);
-      color: #0A1628;
-    }
-
   </style>
 </head>
 <body>
 
-<!-- Animated background -->
-<div class="bg-orbs">
+<div class="bg-wrap">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Header -->
 <div class="app">
+  <!-- HEADER -->
   <header class="header">
     <div class="header-left">
       <div class="logo">PR</div>
@@ -844,107 +769,143 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="header-stat">📄 <span id="s-total">—</span> papers</div>
-      <div class="header-stat">👤 <span id="s-user">—</span></div>
-      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+      <div class="hdr-chip">📄 <b id="s-total">—</b></div>
+      <div class="hdr-chip">👤 <b id="s-user">—</b></div>
+      <button class="icon-btn-sm" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
     </div>
   </header>
 
-  <!-- ── SEARCH VIEW ── -->
-  <div class="view active" id="view-search">
+  <!-- HOME VIEW -->
+  <div class="view active" id="view-home">
     <div class="hero">
-      <h1>Your school,<br>your <span class="grad">past papers.</span></h1>
+      <div class="hero-eyebrow">RIUC Past Questions</div>
+      <h1>Your school,<br>your <em>past papers.</em></h1>
       <p>Finals are stressful enough. Find past questions from your actual courses at RIUC — uploaded by students who've been there.</p>
-      <div class="hero-actions">
+      <div class="hero-btns">
         <button class="btn-primary" onclick="openUpload()">Share a Paper</button>
-        <button class="btn-ghost" onclick="switchNav('bookmarks')">My Saved</button>
+        <button class="btn-ghost" onclick="switchNav('search')">Browse Papers</button>
       </div>
     </div>
 
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input class="search-input" id="search-input" type="text" placeholder="e.g. DCIT205, Database, Amponsah..." oninput="debounceSearch()">
+    <!-- LIVE STATS -->
+    <div class="stats-bar" id="home-stats">
+      <div class="stat-tile"><div class="stat-tile-num blue" id="st-papers">—</div><div class="stat-tile-label">Papers</div></div>
+      <div class="stat-tile"><div class="stat-tile-num green" id="st-students">—</div><div class="stat-tile-label">Students</div></div>
+      <div class="stat-tile"><div class="stat-tile-num yellow" id="st-courses">—</div><div class="stat-tile-label">Courses</div></div>
     </div>
 
-    <div class="filters">
-      <select class="filter-select" id="filter-dept" onchange="fetchPapers(1)">
-        <option value="">All Departments</option>
-        <option>Computer Science</option>
-        <option>Business Administration</option>
-        <option>Engineering</option>
-        <option>Public Admin</option>
-        <option>Information Technology</option>
-        <option>Accounting</option>
-        <option>General Studies</option>
-      </select>
-      <select class="filter-select" id="filter-year" onchange="fetchPapers(1)">
-        <option value="">All Years</option>
-        <option>2024</option><option>2023</option><option>2022</option>
-        <option>2021</option><option>2020</option><option>2019</option>
-      </select>
-      <select class="filter-select" id="filter-type" onchange="fetchPapers(1)">
-        <option value="">All Types</option>
-        <option value="Final Exam">Final Exam</option>
-        <option value="Mid Semester">Mid Semester</option>
-        <option value="Resit">Resit</option>
-        <option value="Quiz">Quiz</option>
-      </select>
-      <select class="filter-select" id="sort-select" onchange="fetchPapers(1)">
-        <option value="recent">Latest</option>
-        <option value="upvotes">Most Upvoted</option>
-      </select>
+    <!-- RECENT ACTIVITY FEED -->
+    <div class="section-head">
+      <h2>Recent Activity</h2>
+      <a onclick="switchNav('search')">See all →</a>
+    </div>
+    <div id="activity-feed">
+      <div class="skeleton" style="height:52px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:52px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:52px"></div>
     </div>
 
-    <div class="section-label">
-      <h2>Past Questions</h2>
-      <span id="result-count"></span>
+    <!-- TOP CONTRIBUTORS MINI -->
+    <div class="section-head" style="margin-top:1.5rem">
+      <h2>Top Contributors</h2>
+      <a onclick="switchNav('dashboard');loadDashboard('leaderboard')">Full leaderboard →</a>
     </div>
-
-    <div id="papers-list"></div>
-    <div id="pagination" class="pagination"></div>
+    <div id="home-leaderboard">
+      <div class="skeleton" style="height:48px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:48px;margin-bottom:8px"></div>
+      <div class="skeleton" style="height:48px"></div>
+    </div>
   </div>
 
-  <!-- ── BOOKMARKS VIEW ── -->
+  <!-- SEARCH VIEW -->
+  <div class="view" id="view-search">
+    <div style="padding-top:1rem">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="search-input" type="text"
+          placeholder="e.g. DCIT205, Database, Amponsah..." oninput="debounceSearch()">
+      </div>
+      <div class="filters">
+        <select class="filter-pill" id="filter-dept" onchange="fetchPapers(1)">
+          <option value="">All Departments</option>
+          <option>Computer Science</option>
+          <option>Business Administration</option>
+          <option>Engineering</option>
+          <option>Public Admin</option>
+          <option>Information Technology</option>
+          <option>Accounting</option>
+          <option>General Studies</option>
+        </select>
+        <select class="filter-pill" id="filter-year" onchange="fetchPapers(1)">
+          <option value="">All Years</option>
+          <option>2025</option><option>2024</option><option>2023</option>
+          <option>2022</option><option>2021</option><option>2020</option>
+        </select>
+        <select class="filter-pill" id="filter-type" onchange="fetchPapers(1)">
+          <option value="">All Types</option>
+          <option value="Final Exam">Final Exam</option>
+          <option value="Mid Semester">Mid Semester</option>
+          <option value="Resit">Resit</option>
+          <option value="Quiz">Quiz</option>
+        </select>
+        <select class="filter-pill" id="sort-select" onchange="fetchPapers(1)">
+          <option value="recent">Latest</option>
+          <option value="upvotes">Most Upvoted</option>
+        </select>
+      </div>
+      <div class="section-head">
+        <h2>Papers</h2>
+        <span id="result-count" style="font-size:12px;color:var(--t3)"></span>
+      </div>
+      <div id="papers-list"></div>
+      <div id="pagination" class="pagination"></div>
+    </div>
+  </div>
+
+  <!-- BOOKMARKS VIEW -->
   <div class="view" id="view-bookmarks">
-    <div class="bookmarks-header">
-      <h2>Saved Papers</h2>
+    <div style="padding-top:1rem">
+      <div class="section-head"><h2>Saved Papers</h2></div>
+      <div id="bookmarks-list"></div>
     </div>
-    <div id="bookmarks-list"></div>
   </div>
 
-  <!-- ── PROFILE VIEW ── -->
-  <div class="view" id="view-profile">
-    <div id="profile-content"></div>
+  <!-- DASHBOARD VIEW -->
+  <div class="view" id="view-dashboard">
+    <div id="dashboard-content" style="padding-top:1rem"></div>
   </div>
 
-  <!-- ── ADMIN VIEW ── -->
+  <!-- ADMIN VIEW -->
   <div class="view" id="view-admin">
     <div id="admin-content" style="padding-top:1rem"></div>
   </div>
 
-  <!-- ── AUTH VIEW ── -->
+  <!-- AUTH VIEW -->
   <div class="view" id="view-auth">
     <div id="auth-content"></div>
   </div>
 </div>
 
-<!-- Bottom nav -->
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-search" onclick="switchNav('search')">
+  <button class="nav-btn active" id="nav-home" onclick="switchNav('home')">
+    <span class="nav-icon">🏠</span>Home
+  </button>
+  <button class="nav-btn" id="nav-search" onclick="switchNav('search')">
     <span class="nav-icon">🔍</span>Search
   </button>
   <button class="nav-btn" id="nav-bookmarks" onclick="switchNav('bookmarks')">
     <span class="nav-icon">📌</span>Saved
   </button>
-  <button class="nav-btn" id="nav-profile" onclick="switchNav('profile')">
-    <span class="nav-icon">👤</span><span id="nav-profile-label">Login</span>
+  <button class="nav-btn" id="nav-dashboard" onclick="switchNav('dashboard')">
+    <span class="nav-icon">👤</span><span id="nav-dash-label">Login</span>
   </button>
   <button class="nav-btn" id="nav-admin" onclick="switchNav('admin')" style="display:none">
-    <span class="nav-icon" style="position:relative">⚡<span class="notif-dot" id="admin-dot" style="display:none"></span></span>Admin
+    <span class="nav-icon" style="position:relative">⚡<span class="nav-dot" id="admin-dot" style="display:none"></span></span>Admin
   </button>
 </nav>
 
-<!-- Upload Modal -->
+<!-- UPLOAD MODAL -->
 <div class="modal-bg" id="upload-modal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -958,8 +919,8 @@
       <div class="form-group">
         <label>Year *</label>
         <select class="form-input" id="u-year">
-          <option>2024</option><option>2023</option><option>2022</option>
-          <option>2021</option><option>2020</option>
+          <option>2025</option><option>2024</option><option>2023</option>
+          <option>2022</option><option>2021</option>
         </select>
       </div>
     </div>
@@ -1008,13 +969,13 @@
         ondragover="handleDrag(event,'zone-ans',true)"
         ondragleave="handleDrag(event,'zone-ans',false)"
         ondrop="handleFileDrop(event,'answer')">
-        Got the answers too? Drop them here (optional)
+        Got the answers too? Drop them here
       </div>
       <input type="file" id="file-input-ans" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(event,'answer')">
     </div>
     <div class="form-group">
       <label>Tags</label>
-      <div class="tag-grid">
+      <div class="tag-wrap">
         <span class="tag-chip" onclick="this.classList.toggle('on')">calculus</span>
         <span class="tag-chip" onclick="this.classList.toggle('on')">programming</span>
         <span class="tag-chip" onclick="this.classList.toggle('on')">hard</span>
@@ -1030,122 +991,188 @@
   </div>
 </div>
 
-<!-- Paper Detail Modal -->
+<!-- PAPER DETAIL MODAL -->
 <div class="modal-bg" id="detail-modal">
-  <div class="modal detail-modal">
+  <div class="modal">
     <div class="modal-handle"></div>
     <div id="detail-content"></div>
   </div>
 </div>
 
-<!-- Notifications Modal -->
+<!-- NOTIFICATIONS MODAL -->
 <div class="modal-bg" id="notif-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <h2>🔔 Notifications</h2>
+    <h2>Notifications</h2>
     <div id="notif-content"></div>
+    <button class="btn-cancel" style="width:100%;margin-top:1rem" onclick="closeNotifs()">Close</button>
   </div>
 </div>
 
 <script>
-  const API = 'https://riuc-backend2.vercel.app';
+  const API           = 'https://riuc-backend2.vercel.app';
   const CLOUD_NAME    = 'dccbwx7s8';
   const UPLOAD_PRESET = 'riuc_papers';
 
-  let currentPage = 1;
-  let totalPages  = 1;
+  // ── State ──
+  let currentPage = 1, totalPages = 1;
   let localBookmarks = new Set();
-  let uploadedFile    = null;
-  let uploadedAnsFile = null;
+  let uploadedFile = null, uploadedAnsFile = null;
   let searchTimer;
   let notifications = JSON.parse(localStorage.getItem('riu_notifs') || '[]');
+  let currentPaper  = null;
+  let currentAdminTab = 'pending';
+  let currentDashTab  = 'profile';
 
-  // ── AUTH ────────────────────────────────────────────────────────────
-  const getToken   = () => localStorage.getItem('riu_token');
-  const getUser    = () => { try { return JSON.parse(localStorage.getItem('riu_user')); } catch { return null; } };
-  const isLoggedIn = () => !!getToken();
-  const authHeaders = () => ({
-    'Content-Type': 'application/json',
-    ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {})
-  });
+  // ── Auth helpers ──
+  const getToken    = () => localStorage.getItem('riu_token');
+  const getUser     = () => { try { return JSON.parse(localStorage.getItem('riu_user')); } catch { return null; } };
+  const isLoggedIn  = () => !!getToken();
+  const authHeaders = () => ({ 'Content-Type': 'application/json', ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}) });
+  function saveAuth(token, user) { localStorage.setItem('riu_token', token); localStorage.setItem('riu_user', JSON.stringify(user)); }
+  function clearAuth() { localStorage.removeItem('riu_token'); localStorage.removeItem('riu_user'); }
 
-  function saveAuth(token, user) {
-    localStorage.setItem('riu_token', token);
-    localStorage.setItem('riu_user', JSON.stringify(user));
-  }
-
-  function clearAuth() {
-    localStorage.removeItem('riu_token');
-    localStorage.removeItem('riu_user');
-  }
-
-  // ── TOAST ────────────────────────────────────────────────────────────
-  function toast(msg, duration = 2500) {
+  // ── Toast ──
+  function toast(msg, dur = 2500) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), duration);
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
   }
 
-  // ── THEME ────────────────────────────────────────────────────────────
+  // ── Theme ──
   function loadTheme() {
-    const saved = localStorage.getItem('theme');
-    const isDark = saved ? saved === 'dark' : true;
+    const isDark = (localStorage.getItem('theme') || 'dark') === 'dark';
     document.body.classList.toggle('light', !isDark);
-    document.getElementById('theme-btn').textContent = isDark ? '☀️' : '🌙';
+    document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
   }
-
   function toggleTheme() {
     const isNowLight = !document.body.classList.contains('light');
     document.body.classList.toggle('light', isNowLight);
-    const btn = document.getElementById('theme-btn');
-    btn.textContent = isNowLight ? '🌙' : '☀️';
+    document.getElementById('theme-btn').textContent = isNowLight ? '🌙' : '☀️';
     localStorage.setItem('theme', isNowLight ? 'light' : 'dark');
-    toast(isNowLight ? '☀️ Light mode on' : '🌙 Dark mode on');
+    toast(isNowLight ? '☀️ Light mode' : '🌙 Dark mode');
   }
 
-  // ── NAVIGATION ───────────────────────────────────────────────────────
+  // ── Navigation ──
   function switchNav(v) {
     document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
     document.getElementById('view-' + v)?.classList.add('active');
     document.getElementById('nav-' + v)?.classList.add('active');
-
+    if (v === 'home')      loadHome();
+    if (v === 'search')    fetchPapers(1);
     if (v === 'bookmarks') fetchBookmarks();
-    if (v === 'profile')   renderProfile();
+    if (v === 'dashboard') loadDashboard();
     if (v === 'admin')     loadAdmin('pending');
-    if (v === 'search')    {}
   }
 
-  // ── CHECK ADMIN ──────────────────────────────────────────────────────
   function checkAdminNav() {
     const user = getUser();
     const btn  = document.getElementById('nav-admin');
-    if (user && user.is_admin) {
-      btn.style.display = '';
-    } else {
-      btn.style.display = 'none';
+    if (user?.is_admin) btn.style.display = '';
+    else btn.style.display = 'none';
+  }
+
+  // ── HOMEPAGE ──
+  async function loadHome() {
+    loadHomeStats();
+    loadActivityFeed();
+    loadHomeLeaderboard();
+  }
+
+  async function loadHomeStats() {
+    try {
+      const [papersRes, usersRes] = await Promise.all([
+        fetch(`${API}/api/papers?limit=1`),
+        fetch(`${API}/api/users`, { headers: authHeaders() }).catch(() => ({ json: () => ({ users: [] }) }))
+      ]);
+      const pd = await papersRes.json();
+      document.getElementById('st-papers').textContent   = pd.total || 0;
+      document.getElementById('s-total').textContent     = pd.total || 0;
+      // Estimate courses from papers
+      document.getElementById('st-courses').textContent  = '—';
+      document.getElementById('st-students').textContent = '—';
+      if (isLoggedIn()) {
+        try {
+          const ud = await (await fetch(`${API}/api/users`, { headers: authHeaders() })).json();
+          document.getElementById('st-students').textContent = (ud.users || []).length;
+        } catch {}
+      }
+    } catch {}
+  }
+
+  async function loadActivityFeed() {
+    const feed = document.getElementById('activity-feed');
+    try {
+      const res  = await fetch(`${API}/api/papers?limit=5&sort=recent`);
+      const data = await res.json();
+      const papers = data.papers || [];
+      if (!papers.length) {
+        feed.innerHTML = '<div class="empty"><span class="empty-icon">📭</span><p>No activity yet. Be the first to upload!</p></div>';
+        return;
+      }
+      const colors = ['#1A56DB','#16A34A','#FBBF24','#7C3AED','#EC4899'];
+      feed.innerHTML = papers.map((p, i) => `
+        <div class="feed-item" style="animation-delay:${i*0.06}s" onclick="viewPaper(${p.id})">
+          <div class="feed-avatar" style="background:${colors[i%colors.length]}">
+            ${(p.uploader_name||'S')[0].toUpperCase()}
+          </div>
+          <div class="feed-text">
+            <strong>${p.uploader_name || 'A student'}</strong>
+            <span> uploaded </span>
+            <span class="feed-code">${p.course_code}</span>
+            <br><span>${p.course_name} · ${p.exam_type}</span>
+          </div>
+          <div class="feed-time">${timeAgo(new Date(p.created_at).getTime())}</div>
+        </div>`).join('');
+    } catch {
+      feed.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span><p>Could not load activity</p></div>';
     }
   }
 
-  // ── PAPERS ───────────────────────────────────────────────────────────
+  async function loadHomeLeaderboard() {
+    const el = document.getElementById('home-leaderboard');
+    try {
+      const res  = await fetch(`${API}/api/users`, { headers: authHeaders() });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      const users = (data.users || []).slice(0, 3);
+      const rankColors = ['gold','silver','bronze'];
+      const rankSymbols = ['🥇','🥈','🥉'];
+      const colors = ['#1A56DB','#16A34A','#FBBF24'];
+      el.innerHTML = users.length ? users.map((u, i) => `
+        <div class="lb-item">
+          <div class="lb-rank ${rankColors[i]}">${rankSymbols[i]}</div>
+          <div class="lb-av" style="background:${colors[i]}">${(u.profile_name||u.username||'?')[0].toUpperCase()}</div>
+          <div style="flex:1">
+            <div class="lb-name">${u.profile_name || u.username}</div>
+            <div class="lb-dept">${u.department || 'RIUC'}</div>
+          </div>
+          <div class="lb-pts">${10 + (2-i)*5} pts</div>
+        </div>`).join('') :
+        '<div class="empty"><span class="empty-icon">🏆</span><p>No contributors yet</p></div>';
+    } catch {
+      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Log in to see the leaderboard</div>';
+    }
+  }
+
+  // ── PAPERS ──
   async function fetchPapers(page = 1) {
     currentPage = page;
     const list = document.getElementById('papers-list');
-    // Skeleton loading
     list.innerHTML = [1,2,3].map(() => `
-      <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--rl);padding:1rem;margin-bottom:10px">
-        <div class="skeleton" style="height:14px;width:60%;margin-bottom:10px"></div>
-        <div class="skeleton" style="height:12px;width:90%;margin-bottom:8px"></div>
-        <div class="skeleton" style="height:12px;width:40%"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:9px">
+        <div class="skeleton" style="height:13px;width:55%;margin-bottom:9px"></div>
+        <div class="skeleton" style="height:12px;width:85%;margin-bottom:7px"></div>
+        <div class="skeleton" style="height:11px;width:38%"></div>
       </div>`).join('');
 
-    const params = new URLSearchParams({ page, limit: 12 });
-    const search = document.getElementById('search-input').value.trim();
-    const dept   = document.getElementById('filter-dept').value;
-    const year   = document.getElementById('filter-year').value;
-    const type   = document.getElementById('filter-type').value;
-    const sort   = document.getElementById('sort-select').value;
+    const params = new URLSearchParams({ page, limit: 15 });
+    const search = document.getElementById('search-input')?.value?.trim();
+    const dept   = document.getElementById('filter-dept')?.value;
+    const year   = document.getElementById('filter-year')?.value;
+    const type   = document.getElementById('filter-type')?.value;
+    const sort   = document.getElementById('sort-select')?.value;
     if (search) params.set('search', search);
     if (dept)   params.set('department', dept);
     if (year)   params.set('year', year);
@@ -1158,66 +1185,58 @@
       const papers = data.papers || [];
       totalPages = data.pages || 1;
 
-      document.getElementById('s-total').textContent = data.total || 0;
+      document.getElementById('s-total').textContent     = data.total || 0;
       document.getElementById('result-count').textContent = data.total ? `${data.total} result${data.total !== 1 ? 's' : ''}` : '';
 
       if (!papers.length) {
-        list.innerHTML = `
-          <div class="empty">
-            <span class="empty-icon">📭</span>
-            <h3>No papers found</h3>
-            <p>Be the first to upload for this course!</p>
-          </div>`;
+        list.innerHTML = `<div class="empty"><span class="empty-icon">📭</span><h3>Nothing here yet</h3><p>Looks like nobody's uploaded for this yet — you could be the first 👀</p></div>`;
         document.getElementById('pagination').innerHTML = '';
         return;
       }
-
       list.innerHTML = papers.map((p, i) => paperCard(p, i)).join('');
       renderPagination();
     } catch (err) {
-      list.innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span><h3>Couldn't load papers</h3><p>${err.message}</p></div>`;
+      list.innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span><h3>Couldn't load</h3><p>${err.message}</p></div>`;
     }
   }
 
   function typeClass(t) {
     if (!t) return '';
     const tl = t.toLowerCase();
-    if (tl.includes('final')) return 'type-final';
-    if (tl.includes('mid'))   return 'type-mid';
-    if (tl.includes('resit')) return 'type-resit';
+    if (tl.includes('final'))  return 'type-final';
+    if (tl.includes('mid'))    return 'type-mid';
+    if (tl.includes('resit'))  return 'type-resit';
     return 'type-quiz';
   }
 
   function paperCard(p, i) {
-    const bm  = localBookmarks.has(String(p.id));
+    const bm   = localBookmarks.has(String(p.id));
     const tags = (p.tags || []).slice(0, 3).map(t => `<span class="pc-tag">${t}</span>`).join('');
-    const hot  = p.upvotes > 5 ? '🔥' : '';
+    const hot  = p.upvotes > 5;
     return `
-      <div class="paper-card" style="animation-delay:${i * 0.05}s" onclick="viewPaper(${p.id})">
+      <div class="paper-card" style="animation-delay:${i*0.04}s" onclick="viewPaper(${p.id})">
         <div class="pc-top">
           <span class="pc-code">${p.course_code}</span>
-          <span class="pc-type-badge ${typeClass(p.exam_type)}">${p.exam_type || ''}</span>
+          <span class="pc-type ${typeClass(p.exam_type)}">${p.exam_type || ''}</span>
         </div>
         <div class="pc-name">${p.course_name}</div>
         <div class="pc-meta">
           <span>${p.department || ''}</span>
-          <span class="pc-meta-dot">·</span>
+          <span class="pc-dot">·</span>
           <span>${p.year}</span>
-          <span class="pc-meta-dot">·</span>
-          <span>by ${p.uploader_name || 'RIUC Student'}</span>
+          <span class="pc-dot">·</span>
+          <span>${p.uploader_name || 'RIUC Student'}</span>
         </div>
         ${tags ? `<div class="pc-tags">${tags}</div>` : ''}
         <div class="pc-bottom">
           <div class="pc-actions">
-            <button class="icon-btn ${bm ? 'bookmarked' : ''}" id="bm-${p.id}" onclick="event.stopPropagation(); toggleBookmark(${p.id})" title="Bookmark">
-              ${bm ? '📌' : '🔖'}
-            </button>
-            <button class="icon-btn" id="up-${p.id}" onclick="event.stopPropagation(); toggleUpvote(${p.id})" title="Upvote">
-              ⬆
-            </button>
+            <button class="icon-btn ${bm ? 'bookmarked' : ''}" id="bm-${p.id}"
+              onclick="event.stopPropagation();toggleBookmark(${p.id})">${bm ? '📌' : '🔖'}</button>
+            <button class="icon-btn" id="up-${p.id}"
+              onclick="event.stopPropagation();toggleUpvote(${p.id})">⬆</button>
           </div>
           <div class="pc-stats">
-            ${hot ? `<span class="pc-stat hot">${hot} ${p.upvotes}</span>` : `<span class="pc-stat">⬆ ${p.upvotes || 0}</span>`}
+            <span class="pc-stat ${hot ? 'hot' : ''}">${hot ? '🔥' : '⬆'} ${p.upvotes || 0}</span>
           </div>
         </div>
       </div>`;
@@ -1227,26 +1246,19 @@
     const el = document.getElementById('pagination');
     if (totalPages <= 1) { el.innerHTML = ''; return; }
     let html = '';
-    if (currentPage > 1) html += `<button class="page-btn" onclick="fetchPapers(${currentPage - 1})">←</button>`;
-    for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
-      html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="fetchPapers(${i})">${i}</button>`;
-    }
-    if (currentPage < totalPages) html += `<button class="page-btn" onclick="fetchPapers(${currentPage + 1})">→</button>`;
+    if (currentPage > 1) html += `<button class="pg-btn" onclick="fetchPapers(${currentPage-1})">←</button>`;
+    for (let i = Math.max(1, currentPage-2); i <= Math.min(totalPages, currentPage+2); i++)
+      html += `<button class="pg-btn ${i===currentPage?'active':''}" onclick="fetchPapers(${i})">${i}</button>`;
+    if (currentPage < totalPages) html += `<button class="pg-btn" onclick="fetchPapers(${currentPage+1})">→</button>`;
     el.innerHTML = html;
   }
 
-  function debounceSearch() {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => fetchPapers(1), 400);
-  }
+  function debounceSearch() { clearTimeout(searchTimer); searchTimer = setTimeout(() => fetchPapers(1), 380); }
 
-  // ── PAPER DETAIL ─────────────────────────────────────────────────────
-  let currentPaper = null;
-
+  // ── PAPER DETAIL ──
   async function viewPaper(id) {
     document.getElementById('detail-modal').classList.add('open');
-    document.getElementById('detail-content').innerHTML = `
-      <div class="empty"><span class="empty-icon">⏳</span><p>Loading...</p></div>`;
+    document.getElementById('detail-content').innerHTML = `<div class="empty"><span class="empty-icon">⏳</span><p>Loading...</p></div>`;
     try {
       const res  = await fetch(`${API}/api/papers/${id}`);
       const data = await res.json();
@@ -1261,120 +1273,94 @@
       } catch {}
 
       const userRating = parseInt(localStorage.getItem(`rating_${id}`) || 0);
-      const isPdf = p.file_url && p.file_url.toLowerCase().includes('.pdf');
-      const hasAnswer = !!p.answer_file_url;
+      const hasAnswer  = !!p.answer_file_url;
 
-      // Build preview tabs
       const previewTabs = hasAnswer ? `
         <div class="preview-tabs">
-          <button class="preview-tab active" id="tab-q" onclick="switchPreview('question', ${id})">📄 Question Paper</button>
-          <button class="preview-tab" id="tab-a" onclick="switchPreview('answer', ${id})">📋 Answer Sheet</button>
+          <button class="ptab active" id="ptab-q" onclick="switchPreview('question',${id})">📄 Question</button>
+          <button class="ptab" id="ptab-a" onclick="switchPreview('answer',${id})">📋 Answers</button>
         </div>` : '';
-
-      // Build preview
-      const previewHtml = buildPreview(p.file_url, 'preview-main-' + id);
 
       document.getElementById('detail-content').innerHTML = `
         ${previewTabs}
-        <div id="preview-wrap-${id}">${previewHtml}</div>
+        <div id="preview-wrap-${id}">${buildPreview(p.file_url, 'pm-'+id)}</div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="detail-meta" style="margin-top:0.9rem">
           <span class="pc-code">${p.course_code}</span>
-          <span class="pc-type-badge ${typeClass(p.exam_type)}">${p.exam_type || ''}</span>
+          <span class="pc-type ${typeClass(p.exam_type)}">${p.exam_type || ''}</span>
         </div>
-        <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:4px">${p.course_name}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:4px">${p.course_name}</div>
         <div class="pc-meta" style="margin-bottom:1rem">
-          <span>${p.department}</span>
-          <span class="pc-meta-dot">·</span>
-          <span>${p.year}</span>
-          <span class="pc-meta-dot">·</span>
-          <span>by ${p.uploader_name || 'RIUC Student'}</span>
+          <span>${p.department}</span><span class="pc-dot">·</span>
+          <span>${p.year}</span><span class="pc-dot">·</span>
+          <span>${p.uploader_name || 'RIUC Student'}</span>
         </div>
 
-        <div class="rating-section">
-          <div class="rating-label">Rate this paper:</div>
+        <div style="margin-bottom:1rem">
+          <div style="font-size:12px;color:var(--t2);margin-bottom:6px">Rate this paper:</div>
           <div class="stars" id="stars-${id}">
-            ${[1,2,3,4,5].map(n => `<span class="star ${n <= userRating ? 'lit' : ''}" onclick="ratePaper(${id},${n})" onmouseover="hoverStars(${id},${n})" onmouseout="resetStars(${id})">★</span>`).join('')}
+            ${[1,2,3,4,5].map(n => `<span class="star ${n<=userRating?'lit':''}"
+              onclick="ratePaper(${id},${n})"
+              onmouseover="hoverStars(${id},${n})"
+              onmouseout="resetStars(${id})">★</span>`).join('')}
           </div>
         </div>
 
-        <div class="dl-btn-wrap">
-          <button class="btn-dl-solid" onclick="downloadFile('${p.file_url}', '${p.course_code}_${p.year}_question')">
+        <div class="dl-btns">
+          <button class="btn-dl" onclick="downloadFile('${p.file_url}','${p.course_code}_${p.year}_question')">
             ⬇ Download Question
           </button>
-          ${hasAnswer ? `<button class="btn-dl-outline" onclick="downloadFile('${p.answer_file_url}', '${p.course_code}_${p.year}_answers')">📋 Download Answers</button>` : ''}
+          ${hasAnswer ? `<button class="btn-dl-out" onclick="downloadFile('${p.answer_file_url}','${p.course_code}_${p.year}_answers')">📋 Answers</button>` : ''}
         </div>
 
-        <div class="section-title">Comments (${comments.length})</div>
+        <div class="sec-title">Comments (${comments.length})</div>
         <div id="comments-${id}">
           ${comments.length
             ? comments.map(c => `
               <div class="comment-item">
-                <div class="comment-author">${c.profile_name || c.username || 'Student'}</div>
+                <div class="comment-author">${c.profile_name||c.username||'Student'}</div>
                 <div class="comment-text">${c.text}</div>
               </div>`).join('')
-            : '<div style="font-size:13px;color:var(--t3);margin-bottom:10px">No comments yet. Be the first! 👇</div>'}
+            : `<div style="font-size:13px;color:var(--t3);margin-bottom:9px">No comments yet. Be the first 👇</div>`}
         </div>
         ${isLoggedIn()
-          ? `<div class="comment-input-wrap">
-               <input class="comment-input" id="comment-input-${id}" placeholder="Was this paper tough? Any tips?">
+          ? `<div class="comment-row">
+               <input class="comment-input" id="ci-${id}" placeholder="Was this paper tough? Any tips?">
                <button class="btn-comment" onclick="postComment(${id})">Send</button>
              </div>`
           : `<p style="font-size:12px;color:var(--t3);margin-top:8px">
-               <a style="color:var(--gold);cursor:pointer" onclick="closeDetail();switchNav('profile')">Log in</a> to comment
+               <a style="color:var(--riuc-blue);cursor:pointer" onclick="closeDetail();switchNav('dashboard')">Log in</a> to comment
              </p>`}
-
-        <div style="margin-top:1.25rem">
-          <button class="btn-cancel" style="width:100%" onclick="closeDetail()">Close</button>
-        </div>`;
+        <button class="btn-cancel" style="width:100%;margin-top:1.1rem" onclick="closeDetail()">Close</button>`;
     } catch (err) {
-      document.getElementById('detail-content').innerHTML = `
-        <div class="empty"><span class="empty-icon">⚠️</span><h3>Couldn't load</h3><p>${err.message}</p></div>`;
+      document.getElementById('detail-content').innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span><h3>Couldn't load</h3><p>${err.message}</p></div>`;
     }
   }
 
   function buildPreview(url, id) {
-    if (!url) return '<div class="preview-error">No file attached</div>';
+    if (!url) return '<div style="text-align:center;padding:2rem;color:var(--t3);font-size:13px">No file attached</div>';
     const isPdf = url.toLowerCase().includes('.pdf') || url.includes('resource_type=raw');
     if (isPdf) {
-      // Use Google Docs viewer as fallback for cross-origin PDFs
-      const gviewUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-      return `
-        <div class="preview-container">
-          <iframe class="preview-pdf" id="${id}" src="${gviewUrl}"
-            allowfullscreen loading="lazy"
-            onerror="this.style.display='none';document.getElementById('${id}-fb').style.display='block'">
-          </iframe>
-          <div id="${id}-fb" style="display:none" class="preview-error">
-            Preview unavailable. Use the download button below. 👇
-          </div>
-        </div>`;
-    } else {
-      return `
-        <div class="preview-container">
-          <img class="preview-img" src="${url}" alt="Paper preview"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-          <div class="preview-error" style="display:none">Image preview failed. Download to view.</div>
-        </div>`;
+      const gview = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+      return `<div class="preview-wrap"><iframe class="preview-pdf" id="${id}" src="${gview}" allowfullscreen loading="lazy"></iframe></div>`;
     }
+    return `<div class="preview-wrap"><img class="preview-img" src="${url}" alt="Paper" onerror="this.style.display='none'"></div>`;
   }
 
   function switchPreview(type, id) {
-    const p = currentPaper;
-    if (!p) return;
-    const url  = type === 'answer' ? p.answer_file_url : p.file_url;
+    if (!currentPaper) return;
+    const url = type === 'answer' ? currentPaper.answer_file_url : currentPaper.file_url;
     const wrap = document.getElementById('preview-wrap-' + id);
-    if (wrap) wrap.innerHTML = buildPreview(url, 'preview-' + type + '-' + id);
-    document.getElementById('tab-q')?.classList.toggle('active', type === 'question');
-    document.getElementById('tab-a')?.classList.toggle('active', type === 'answer');
+    if (wrap) wrap.innerHTML = buildPreview(url, 'pp-' + type + '-' + id);
+    document.getElementById('ptab-q')?.classList.toggle('active', type === 'question');
+    document.getElementById('ptab-a')?.classList.toggle('active', type === 'answer');
   }
 
-  // Download fix — fetch as blob to bypass cross-origin download block
   async function downloadFile(url, filename) {
     toast('⏳ Preparing download...');
     try {
       const res  = await fetch(url);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!res.ok) throw new Error();
       const blob = await res.blob();
       const ext  = url.split('.').pop().split('?')[0] || 'pdf';
       const a    = document.createElement('a');
@@ -1383,8 +1369,7 @@
       a.click();
       URL.revokeObjectURL(a.href);
       toast('✅ Download started!');
-    } catch (err) {
-      // Fallback: open in new tab
+    } catch {
       window.open(url, '_blank');
       toast('📄 Opened in new tab');
     }
@@ -1392,83 +1377,44 @@
 
   function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); currentPaper = null; }
 
-  // ── RATINGS ──────────────────────────────────────────────────────────
-  function hoverStars(id, n) {
-    document.querySelectorAll(`#stars-${id} .star`).forEach((s, i) => {
-      s.classList.toggle('lit', i < n);
-    });
-  }
-  function resetStars(id) {
-    const saved = parseInt(localStorage.getItem(`rating_${id}`) || 0);
-    document.querySelectorAll(`#stars-${id} .star`).forEach((s, i) => {
-      s.classList.toggle('lit', i < saved);
-    });
-  }
+  // ── RATINGS ──
+  function hoverStars(id, n) { document.querySelectorAll(`#stars-${id} .star`).forEach((s,i) => s.classList.toggle('lit', i<n)); }
+  function resetStars(id) { const s = parseInt(localStorage.getItem(`rating_${id}`)||0); document.querySelectorAll(`#stars-${id} .star`).forEach((el,i) => el.classList.toggle('lit', i<s)); }
   async function ratePaper(id, rating) {
-    localStorage.setItem(`rating_${id}`, rating);
-    resetStars(id);
-    toast(`⭐ Rated ${rating}/5`);
-    if (isLoggedIn()) {
-      try {
-        await fetch(`${API}/api/papers/${id}/rate`, {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({ rating })
-        });
-      } catch {}
-    }
+    localStorage.setItem(`rating_${id}`, rating); resetStars(id); toast(`⭐ Rated ${rating}/5`);
+    if (isLoggedIn()) { try { await fetch(`${API}/api/papers/${id}/rate`, { method:'POST', headers:authHeaders(), body:JSON.stringify({rating}) }); } catch {} }
   }
 
-  // ── COMMENTS ─────────────────────────────────────────────────────────
+  // ── COMMENTS ──
   async function postComment(paperId) {
-    const input = document.getElementById(`comment-input-${paperId}`);
+    const input = document.getElementById(`ci-${paperId}`);
     const text  = input?.value?.trim();
     if (!text) return;
     try {
-      const res = await fetch(`${API}/api/papers/${paperId}/comments`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ text })
-      });
+      const res = await fetch(`${API}/api/papers/${paperId}/comments`, { method:'POST', headers:authHeaders(), body:JSON.stringify({text}) });
       if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
       const user = getUser();
-      const box  = document.getElementById(`comments-${paperId}`);
-      box.innerHTML += `
+      document.getElementById(`comments-${paperId}`).innerHTML += `
         <div class="comment-item" style="animation:fadeUp 0.3s ease">
-          <div class="comment-author">${user?.profile_name || user?.username || 'You'}</div>
+          <div class="comment-author">${user?.profile_name||user?.username||'You'}</div>
           <div class="comment-text">${text}</div>
         </div>`;
       input.value = '';
       toast('💬 Comment posted!');
-    } catch (err) {
-      toast('❌ ' + err.message);
-    }
+    } catch { toast('❌ Comment failed'); }
   }
 
-  // ── BOOKMARKS ────────────────────────────────────────────────────────
-  function loadLocalBookmarks() {
-    try { localBookmarks = new Set(JSON.parse(localStorage.getItem('bookmarks') || '[]')); } catch {}
-  }
-
-  function isBookmarked(id) { return localBookmarks.has(String(id)); }
+  // ── BOOKMARKS ──
+  function loadLocalBookmarks() { try { localBookmarks = new Set(JSON.parse(localStorage.getItem('bookmarks')||'[]')); } catch {} }
 
   async function toggleBookmark(id) {
-    const sid = String(id);
-    const was = localBookmarks.has(sid);
-    if (was) { localBookmarks.delete(sid); } else { localBookmarks.add(sid); }
+    const sid = String(id), was = localBookmarks.has(sid);
+    was ? localBookmarks.delete(sid) : localBookmarks.add(sid);
     localStorage.setItem('bookmarks', JSON.stringify([...localBookmarks]));
     const btn = document.getElementById('bm-' + id);
-    if (btn) {
-      btn.classList.toggle('bookmarked', !was);
-      btn.textContent = was ? '🔖' : '📌';
-    }
-    toast(was ? '🔖 Removed from saved' : '📌 Saved!');
-    if (isLoggedIn()) {
-      try {
-        await fetch(`${API}/api/bookmarks/${id}`, { method: was ? 'DELETE' : 'POST', headers: authHeaders() });
-      } catch {}
-    }
+    if (btn) { btn.classList.toggle('bookmarked', !was); btn.textContent = was ? '🔖' : '📌'; }
+    toast(was ? '🔖 Removed' : '📌 Saved!');
+    if (isLoggedIn()) { try { await fetch(`${API}/api/bookmarks/${id}`, { method: was?'DELETE':'POST', headers:authHeaders() }); } catch {} }
   }
 
   async function fetchBookmarks() {
@@ -1477,44 +1423,41 @@
       list.innerHTML = `<div class="empty"><span class="empty-icon">📌</span><h3>Nothing saved yet</h3><p>Tap the bookmark icon on any paper to save it here.</p></div>`;
       return;
     }
-    list.innerHTML = `<div class="skeleton" style="height:80px;margin-bottom:10px;border-radius:var(--rl)"></div>`.repeat(3);
+    list.innerHTML = `<div class="skeleton" style="height:80px;margin-bottom:9px;border-radius:var(--rl)"></div>`.repeat(3);
     try {
       let papers = [];
       if (isLoggedIn()) {
-        const res  = await fetch(`${API}/api/bookmarks`, { headers: authHeaders() });
+        const res = await fetch(`${API}/api/bookmarks`, { headers:authHeaders() });
         const data = await res.json();
         papers = Array.isArray(data) ? data : (data.papers || []);
         localBookmarks = new Set(papers.map(p => String(p.id)));
         localStorage.setItem('bookmarks', JSON.stringify([...localBookmarks]));
       } else {
-        const ids = [...localBookmarks];
-        papers    = (await Promise.all(ids.map(id => fetch(`${API}/api/papers/${id}`).then(r => r.json()).then(d => d.paper || d).catch(() => null)))).filter(Boolean);
+        papers = (await Promise.all([...localBookmarks].map(id =>
+          fetch(`${API}/api/papers/${id}`).then(r=>r.json()).then(d=>d.paper||d).catch(()=>null)
+        ))).filter(Boolean);
       }
-      if (!papers.length) {
-        list.innerHTML = `<div class="empty"><span class="empty-icon">📌</span><h3>Nothing saved yet</h3><p>Tap the bookmark icon on any paper.</p></div>`;
-        return;
-      }
-      list.innerHTML = papers.map((p, i) => paperCard(p, i)).join('');
-    } catch (err) {
-      list.innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span><h3>Failed to load</h3><p>${err.message}</p></div>`;
-    }
+      list.innerHTML = papers.length
+        ? papers.map((p,i) => paperCard(p,i)).join('')
+        : `<div class="empty"><span class="empty-icon">📌</span><h3>Nothing saved yet</h3><p>Tap the bookmark icon on any paper.</p></div>`;
+    } catch { list.innerHTML = `<div class="empty"><span class="empty-icon">⚠️</span><p>Failed to load</p></div>`; }
   }
 
-  // ── UPVOTES ──────────────────────────────────────────────────────────
+  // ── UPVOTES ──
   async function toggleUpvote(id) {
-    if (!isLoggedIn()) { toast('Log in to upvote!'); switchNav('profile'); return; }
+    if (!isLoggedIn()) { toast('Log in to upvote'); switchNav('dashboard'); return; }
     try {
-      const res  = await fetch(`${API}/api/upvotes/${id}`, { method: 'POST', headers: authHeaders() });
+      const res = await fetch(`${API}/api/upvotes/${id}`, { method:'POST', headers:authHeaders() });
       const data = await res.json();
-      const btn  = document.getElementById('up-' + id);
-      if (btn) { btn.classList.toggle('upvoted', data.upvoted); }
+      const btn = document.getElementById('up-' + id);
+      if (btn) btn.classList.toggle('upvoted', data.upvoted);
       toast(data.upvoted ? '⬆ Upvoted!' : 'Upvote removed');
-    } catch (err) { toast('❌ ' + err.message); }
+    } catch { toast('❌ Failed'); }
   }
 
-  // ── UPLOAD MODAL ──────────────────────────────────────────────────────
+  // ── UPLOAD ──
   function openUpload() {
-    if (!isLoggedIn()) { switchNav('profile'); renderAuth('login'); toast('Please log in to upload'); return; }
+    if (!isLoggedIn()) { switchNav('dashboard'); renderAuth('login'); toast('Log in to upload'); return; }
     document.getElementById('upload-modal').classList.add('open');
   }
   function closeUpload() {
@@ -1522,162 +1465,97 @@
     uploadedFile = uploadedAnsFile = null;
     document.getElementById('upload-zone').textContent = 'Drop your PDF here or tap to browse';
     document.getElementById('upload-zone').className = 'upload-zone';
-    document.getElementById('upload-zone-ans').textContent = 'Got the answers too? Drop them here (optional)';
+    document.getElementById('upload-zone-ans').textContent = 'Got the answers too? Drop them here';
     document.getElementById('upload-zone-ans').className = 'upload-zone';
     document.getElementById('upload-alert').innerHTML = '';
   }
-
-  function handleDrag(e, zoneId, over) {
-    e.preventDefault();
-    document.getElementById('upload-' + zoneId)?.classList.toggle('dragover', over);
-  }
-
-  function handleFileDrop(e, type) {
-    e.preventDefault();
-    const zoneId = type === 'question' ? 'zone' : 'zone-ans';
-    document.getElementById('upload-' + zoneId)?.classList.remove('dragover');
-    if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0], type);
-  }
-
-  function handleFileSelect(e, type) {
-    if (e.target.files[0]) processFile(e.target.files[0], type);
-  }
-
+  function handleDrag(e, zoneId, over) { e.preventDefault(); document.getElementById('upload-' + zoneId)?.classList.toggle('dragover', over); }
+  function handleFileDrop(e, type) { e.preventDefault(); const z=type==='question'?'zone':'zone-ans'; document.getElementById('upload-'+z)?.classList.remove('dragover'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0],type); }
+  function handleFileSelect(e, type) { if(e.target.files[0]) processFile(e.target.files[0],type); }
   function processFile(file, type) {
     const valid = ['application/pdf','image/jpeg','image/png','image/jpg'];
-    if (!valid.includes(file.type)) { showUploadAlert('Only PDF and images allowed.', 'error'); return; }
-    if (file.size > 5 * 1024 * 1024) { showUploadAlert('File must be under 5MB.', 'error'); return; }
-    if (type === 'question') {
-      uploadedFile = file;
-      const z = document.getElementById('upload-zone');
-      z.textContent = '✅ ' + file.name;
-      z.className = 'upload-zone has-file';
-    } else {
-      uploadedAnsFile = file;
-      const z = document.getElementById('upload-zone-ans');
-      z.textContent = '✅ ' + file.name;
-      z.className = 'upload-zone has-file';
-    }
+    if (!valid.includes(file.type)) { showUploadAlert('Only PDF and images allowed.','error'); return; }
+    if (file.size > 5*1024*1024) { showUploadAlert('File must be under 5MB.','error'); return; }
+    if (type==='question') { uploadedFile=file; const z=document.getElementById('upload-zone'); z.textContent='✅ '+file.name; z.className='upload-zone has-file'; }
+    else { uploadedAnsFile=file; const z=document.getElementById('upload-zone-ans'); z.textContent='✅ '+file.name; z.className='upload-zone has-file'; }
   }
-
   async function uploadToCloudinary(file) {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', UPLOAD_PRESET);
-    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: fd });
+    const fd = new FormData(); fd.append('file',file); fd.append('upload_preset',UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,{method:'POST',body:fd});
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Upload failed');
+    if (!res.ok) throw new Error(data.error?.message||'Upload failed');
     return data.secure_url;
   }
-
   async function submitUpload() {
-    const code = document.getElementById('u-code').value.trim().toUpperCase();
-    const name = document.getElementById('u-name').value.trim();
-    if (!code || !name) { showUploadAlert('Fill in course code and name.', 'error'); return; }
-    if (!uploadedFile)  { showUploadAlert('Attach a question file first.', 'error'); return; }
-
-    const tags = [...document.querySelectorAll('.tag-chip.on')].map(b => b.textContent);
-    const btn  = document.getElementById('submit-btn');
-    btn.disabled = true;
-
+    const code=document.getElementById('u-code').value.trim().toUpperCase();
+    const name=document.getElementById('u-name').value.trim();
+    if (!code||!name) { showUploadAlert('Fill in course code and name.','error'); return; }
+    if (!uploadedFile)  { showUploadAlert('Attach a question file first.','error'); return; }
+    const tags=[...document.querySelectorAll('.tag-chip.on')].map(b=>b.textContent);
+    const btn=document.getElementById('submit-btn'); btn.disabled=true;
     try {
-      btn.textContent = '⏳ Uploading file...';
+      btn.textContent='⏳ Uploading...';
       const file_url = await uploadToCloudinary(uploadedFile);
       let answer_file_url = null;
-      if (uploadedAnsFile) {
-        btn.textContent = '⏳ Uploading answers...';
-        answer_file_url = await uploadToCloudinary(uploadedAnsFile);
-      }
-
-      btn.textContent = '💾 Saving...';
-      const res  = await fetch(`${API}/api/papers`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          course_code: code,
-          course_name: name,
-          department:  document.getElementById('u-dept').value,
-          year:        parseInt(document.getElementById('u-year').value),
-          exam_type:   document.getElementById('u-type').value,
-          file_url,
-          answer_file_url,
-          tags
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
-      showUploadAlert('✅ Submitted! Pending admin approval.', 'success');
-      addNotification('⏳', 'Your paper is pending review', 'new');
-      setTimeout(() => { closeUpload(); fetchPapers(1); }, 2000);
-    } catch (err) {
-      showUploadAlert('❌ ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Submit for Review';
-    }
+      if (uploadedAnsFile) { btn.textContent='⏳ Uploading answers...'; answer_file_url=await uploadToCloudinary(uploadedAnsFile); }
+      btn.textContent='💾 Saving...';
+      const res=await fetch(`${API}/api/papers`,{method:'POST',headers:authHeaders(),body:JSON.stringify({
+        course_code:code, course_name:name,
+        department:document.getElementById('u-dept').value,
+        year:parseInt(document.getElementById('u-year').value),
+        exam_type:document.getElementById('u-type').value,
+        file_url, answer_file_url, tags
+      })});
+      const data=await res.json();
+      if (!res.ok) throw new Error(data.error||'Failed');
+      showUploadAlert('✅ Submitted! Pending admin approval.','success');
+      addNotification('⏳','Your paper is pending review','new');
+      setTimeout(()=>{ closeUpload(); fetchPapers(1); },2000);
+    } catch(err) { showUploadAlert('❌ '+err.message,'error'); }
+    finally { btn.disabled=false; btn.textContent='Send for Review'; }
   }
+  function showUploadAlert(msg,type) { document.getElementById('upload-alert').innerHTML=`<div class="alert alert-${type==='error'?'error':'success'}">${msg}</div>`; }
 
-  function showUploadAlert(msg, type) {
-    document.getElementById('upload-alert').innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : 'success'}">${msg}</div>`;
-  }
-
-  // ── NOTIFICATIONS ────────────────────────────────────────────────────
-  function addNotification(icon, text, type) {
-    notifications.unshift({ icon, text, type, time: Date.now() });
-    if (notifications.length > 20) notifications.pop();
-    localStorage.setItem('riu_notifs', JSON.stringify(notifications));
-  }
-
+  // ── NOTIFICATIONS ──
+  function addNotification(icon,text,type) { notifications.unshift({icon,text,type,time:Date.now()}); if(notifications.length>20)notifications.pop(); localStorage.setItem('riu_notifs',JSON.stringify(notifications)); }
   function openNotifs() {
     document.getElementById('notif-modal').classList.add('open');
-    const content = document.getElementById('notif-content');
-    if (!notifications.length) {
-      content.innerHTML = `<div class="empty"><span class="empty-icon">🔔</span><h3>All clear!</h3><p>No notifications yet.</p></div>`;
-    } else {
-      content.innerHTML = notifications.map(n => `
-        <div class="notif-item">
-          <div class="notif-icon ${n.type}">${n.icon}</div>
-          <div>
-            <div class="notif-text">${n.text}</div>
-            <div class="notif-time">${timeAgo(n.time)}</div>
-          </div>
-        </div>`).join('');
-    }
+    const c=document.getElementById('notif-content');
+    c.innerHTML = notifications.length ? notifications.map(n=>`
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:1.4rem">${n.icon}</div>
+        <div>
+          <div style="font-size:13px;color:var(--t1)">${n.text}</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">${timeAgo(n.time)}</div>
+        </div>
+      </div>`).join('') :
+      `<div class="empty"><span class="empty-icon">🔔</span><h3>All clear</h3><p>No notifications yet.</p></div>`;
   }
   function closeNotifs() { document.getElementById('notif-modal').classList.remove('open'); }
-
   function timeAgo(ts) {
-    const diff = Date.now() - ts;
-    if (diff < 60000) return 'just now';
-    if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
-    if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
-    return Math.floor(diff/86400000) + 'd ago';
+    const d=Date.now()-ts;
+    if(d<60000) return 'just now';
+    if(d<3600000) return Math.floor(d/60000)+'m ago';
+    if(d<86400000) return Math.floor(d/3600000)+'h ago';
+    return Math.floor(d/86400000)+'d ago';
   }
 
-  // ── AUTH ─────────────────────────────────────────────────────────────
-  function renderAuth(mode) {
-    // Activate the profile view/nav button directly (do NOT call switchNav,
-    // since switchNav('profile') triggers renderProfile(), which calls
-    // renderAuth('login') again when logged out -> infinite recursion).
-    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('view-profile')?.classList.add('active');
-    document.getElementById('nav-profile')?.classList.add('active');
-
-    const content = document.getElementById('profile-content');
-    if (mode === 'login') {
-      content.innerHTML = `
+  // ── AUTH ──
+  function renderAuth(mode='login') {
+    const c = document.getElementById('auth-content');
+    if (mode==='login') {
+      c.innerHTML=`
         <div class="auth-card">
           <h2>Good to see you 👋</h2>
           <p>Log back in to your account.</p>
           <div id="auth-alert"></div>
           <div class="form-group"><label>Email</label><input class="form-input" id="auth-email" type="email" placeholder="your@email.com"></div>
-          <div class="form-group"><label>Password</label><input class="form-input" id="auth-pass" type="password" placeholder="••••••••"></div>
-          <button class="btn-submit" style="width:100%;padding:13px" onclick="doLogin()">Log in</button>
+          <div class="form-group"><label>Password</label><input class="form-input" id="auth-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+          <button class="btn-submit" style="width:100%;padding:12px;margin-top:4px" onclick="doLogin()">Log in</button>
           <div class="auth-toggle">No account? <a onclick="renderAuth('register')">Register here</a></div>
         </div>`;
     } else {
-      content.innerHTML = `
+      c.innerHTML=`
         <div class="auth-card">
           <h2>Create an account</h2>
           <p>Takes 30 seconds. No email verification nonsense.</p>
@@ -1693,12 +1571,9 @@
               <label>Department</label>
               <select class="form-input" id="auth-dept">
                 <option value="">Select...</option>
-                <option>Computer Science</option>
-                <option>Business Administration</option>
-                <option>Engineering</option>
-                <option>Public Admin</option>
-                <option>Information Technology</option>
-                <option>Accounting</option>
+                <option>Computer Science</option><option>Business Administration</option>
+                <option>Engineering</option><option>Public Admin</option>
+                <option>Information Technology</option><option>Accounting</option>
                 <option>General Studies</option>
               </select>
             </div>
@@ -1706,92 +1581,162 @@
               <label>Level</label>
               <select class="form-input" id="auth-level">
                 <option value="">Select...</option>
-                <option value="100">100</option>
-                <option value="200">200</option>
-                <option value="300">300</option>
-                <option value="400">400</option>
+                <option value="100">100</option><option value="200">200</option>
+                <option value="300">300</option><option value="400">400</option>
               </select>
             </div>
           </div>
-          <button class="btn-submit" style="width:100%;padding:13px" onclick="doRegister()">Create Account</button>
+          <button class="btn-submit" style="width:100%;padding:12px;margin-top:4px" onclick="doRegister()">Create Account</button>
           <div class="auth-toggle">Have an account? <a onclick="renderAuth('login')">Log in</a></div>
         </div>`;
     }
   }
 
-  function setAuthAlert(msg, type) {
-    const el = document.getElementById('auth-alert');
-    if (el) el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-  }
+  function setAuthAlert(msg,type) { const el=document.getElementById('auth-alert'); if(el) el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`; }
 
   async function doLogin() {
-    const email    = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-pass').value;
-    if (!email || !password) { setAuthAlert('Fill in all fields.', 'error'); return; }
+    const email=document.getElementById('auth-email').value.trim();
+    const password=document.getElementById('auth-pass').value;
+    if (!email||!password) { setAuthAlert('Fill in all fields.','error'); return; }
     try {
-      const res  = await fetch(`${API}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      saveAuth(data.token, data.user);
-      document.getElementById('nav-profile-label').textContent = 'Profile';
-      document.getElementById('s-user').textContent = data.user.profile_name || data.user.username;
+      const res=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+      const data=await res.json();
+      if (!res.ok) throw new Error(data.error||'Login failed');
+      saveAuth(data.token,data.user);
+      document.getElementById('nav-dash-label').textContent='Me';
+      document.getElementById('s-user').textContent=data.user.profile_name||data.user.username;
       checkAdminNav();
       await fetchBookmarks();
-      switchNav('search');
-      toast('👋 Welcome back, ' + (data.user.profile_name || data.user.username) + '!');
-    } catch (err) {
-      setAuthAlert(err.message, 'error');
-    }
+      switchNav('home');
+      toast('👋 Welcome back, '+(data.user.profile_name||data.user.username)+'!');
+    } catch(err) { setAuthAlert(err.message,'error'); }
   }
 
   async function doRegister() {
-    const username     = document.getElementById('auth-username').value.trim();
-    const profile_name = document.getElementById('auth-displayname').value.trim();
-    const email        = document.getElementById('auth-email').value.trim();
-    const password     = document.getElementById('auth-pass').value;
-    const department   = document.getElementById('auth-dept').value;
-    const level        = document.getElementById('auth-level').value;
-    if (!username || !email || !password) { setAuthAlert('Fill in required fields.', 'error'); return; }
+    const username=document.getElementById('auth-username').value.trim();
+    const profile_name=document.getElementById('auth-displayname').value.trim();
+    const email=document.getElementById('auth-email').value.trim();
+    const password=document.getElementById('auth-pass').value;
+    const department=document.getElementById('auth-dept').value;
+    const level=document.getElementById('auth-level').value;
+    if (!username||!email||!password) { setAuthAlert('Fill in required fields.','error'); return; }
     try {
-      const res  = await fetch(`${API}/api/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, email, password, profile_name, department, level: parseInt(level) || null }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed');
-      saveAuth(data.token, data.user);
-      document.getElementById('nav-profile-label').textContent = 'Profile';
-      document.getElementById('s-user').textContent = data.user.profile_name || data.user.username;
+      const res=await fetch(`${API}/api/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,email,password,profile_name,department,level:parseInt(level)||null})});
+      const data=await res.json();
+      if (!res.ok) throw new Error(data.error||'Registration failed');
+      saveAuth(data.token,data.user);
+      document.getElementById('nav-dash-label').textContent='Me';
+      document.getElementById('s-user').textContent=data.user.profile_name||data.user.username;
       checkAdminNav();
-      switchNav('search');
+      switchNav('home');
       toast('🎉 Welcome to PastPapers RIUC!');
-    } catch (err) {
-      setAuthAlert(err.message, 'error');
-    }
+    } catch(err) { setAuthAlert(err.message,'error'); }
   }
 
-  // ── PROFILE ──────────────────────────────────────────────────────────
-  function renderProfile() {
-    const content = document.getElementById('profile-content');
-    if (!isLoggedIn()) { renderAuth('login'); return; }
-    const user = getUser();
-    content.innerHTML = `
-      <div class="profile-hero">
-        <div class="avatar">${(user.profile_name || user.username || 'U')[0].toUpperCase()}</div>
-        <div class="profile-name">${user.profile_name || user.username}</div>
-        <div class="profile-meta">${user.department || 'RIUC'} ${user.level ? '· Level ' + user.level : ''}</div>
-        <div class="profile-stats">
-          <div class="p-stat"><div class="p-stat-n" id="p-uploads">—</div><div class="p-stat-l">Uploads</div></div>
-          <div class="p-stat"><div class="p-stat-n">${localBookmarks.size}</div><div class="p-stat-l">Saved</div></div>
-          <div class="p-stat"><div class="p-stat-n">—</div><div class="p-stat-l">Upvotes</div></div>
-        </div>
-        <button class="btn-primary" style="width:100%;margin-bottom:10px" onclick="openNotifs()">Notifications</button>
-        <button class="logout-btn" onclick="logout()">Log out</button>
+  // ── DASHBOARD ──
+  function loadDashboard(tab) {
+    currentDashTab = tab || currentDashTab;
+    const c = document.getElementById('dashboard-content');
+    if (!isLoggedIn()) { renderAuth('login'); switchNav('auth'); return; }
+    const user   = getUser();
+    const letter = (user.profile_name||user.username||'U')[0].toUpperCase();
+
+    // Gamification data (local for now, points from uploads)
+    const uploads  = parseInt(localStorage.getItem('riu_uploads') || 0);
+    const pts      = uploads * 10 + localBookmarks.size * 2;
+    const level    = pts < 50 ? 'Freshman' : pts < 150 ? 'Sophomore' : pts < 300 ? 'Junior' : 'Senior';
+    const nextPts  = pts < 50 ? 50 : pts < 150 ? 150 : pts < 300 ? 300 : 500;
+    const pct      = Math.min(100, Math.round((pts / nextPts) * 100));
+
+    const badges = [
+      { icon:'📤', name:'First Upload', locked: uploads < 1 },
+      { icon:'📌', name:'Bookmarker',   locked: localBookmarks.size < 1 },
+      { icon:'🔥', name:'5 Uploads',    locked: uploads < 5 },
+      { icon:'🏆', name:'Top 3',        locked: true },
+    ];
+
+    const dashTabs = `
+      <div style="display:flex;gap:6px;margin-bottom:1rem">
+        <button class="a-tab ${currentDashTab==='profile'?'active':''}"     onclick="loadDashboard('profile')">Profile</button>
+        <button class="a-tab ${currentDashTab==='leaderboard'?'active':''}" onclick="loadDashboard('leaderboard')">🏆 Board</button>
+        <button class="a-tab ${currentDashTab==='notifs'?'active':''}"      onclick="loadDashboard('notifs')">🔔 Alerts</button>
       </div>`;
-    // Fetch upload count
-    fetch(`${API}/api/users/me/uploads`, { headers: authHeaders() })
-      .then(r => r.json())
-      .then(d => {
-        const el = document.getElementById('p-uploads');
-        if (el) el.textContent = (d.papers || []).length;
-      }).catch(() => {});
+
+    if (currentDashTab === 'profile') {
+      c.innerHTML = `
+        ${dashTabs}
+        <div class="dash-hero">
+          <div class="dash-avatar">${letter}</div>
+          <div>
+            <div class="dash-name">${user.profile_name||user.username}</div>
+            <div class="dash-sub">${user.department||'RIUC'} ${user.level?'· Level '+user.level:''}</div>
+            <div class="dash-level">⭐ ${level}</div>
+          </div>
+        </div>
+        <div class="dash-stats">
+          <div class="dash-stat"><div class="dash-stat-n" id="d-uploads">—</div><div class="dash-stat-l">Uploads</div></div>
+          <div class="dash-stat"><div class="dash-stat-n">${localBookmarks.size}</div><div class="dash-stat-l">Saved</div></div>
+          <div class="dash-stat"><div class="dash-stat-n">${pts}</div><div class="dash-stat-l">Points</div></div>
+        </div>
+        <div class="xp-card">
+          <div class="xp-row">
+            <span class="xp-label">Progress to ${pts < 50 ? 'Sophomore' : pts < 150 ? 'Junior' : pts < 300 ? 'Senior' : 'Legend'}</span>
+            <span class="xp-pts">${pts} / ${nextPts} pts</span>
+          </div>
+          <div class="xp-track"><div class="xp-fill" style="width:${pct}%"></div></div>
+          <div class="xp-next">Upload papers to earn points and level up!</div>
+        </div>
+        <div class="sec-title">Badges</div>
+        <div class="badges-grid">
+          ${badges.map(b=>`
+            <div class="badge-tile ${b.locked?'locked':''}">
+              <div class="badge-icon">${b.icon}</div>
+              <div class="badge-name">${b.name}</div>
+            </div>`).join('')}
+        </div>
+        <button class="logout-btn" onclick="logout()">Log out</button>`;
+
+      // Fetch real upload count
+      fetch(`${API}/api/users/me/uploads`, { headers:authHeaders() })
+        .then(r=>r.json()).then(d=>{
+          const n = (d.papers||[]).length;
+          const el = document.getElementById('d-uploads');
+          if (el) el.textContent = n;
+          localStorage.setItem('riu_uploads', n);
+        }).catch(()=>{});
+
+    } else if (currentDashTab === 'leaderboard') {
+      c.innerHTML = dashTabs + `<div class="sec-title">Top Contributors</div><div id="lb-list"><div class="skeleton" style="height:50px;margin-bottom:8px"></div><div class="skeleton" style="height:50px;margin-bottom:8px"></div><div class="skeleton" style="height:50px"></div></div>`;
+      fetch(`${API}/api/users`, { headers:authHeaders() }).then(r=>r.json()).then(data=>{
+        const users  = (data.users||[]).slice(0,10);
+        const colors = ['#1A56DB','#16A34A','#FBBF24','#7C3AED','#EC4899'];
+        const ranks  = [{cls:'gold',sym:'🥇'},{cls:'silver',sym:'🥈'},{cls:'bronze',sym:'🥉'}];
+        document.getElementById('lb-list').innerHTML = users.length ? users.map((u,i)=>`
+          <div class="lb-item">
+            <div class="lb-rank ${ranks[i]?.cls||'other'}">${ranks[i]?.sym||i+1}</div>
+            <div class="lb-av" style="background:${colors[i%colors.length]}">${(u.profile_name||u.username||'?')[0].toUpperCase()}</div>
+            <div style="flex:1">
+              <div class="lb-name">${u.profile_name||u.username}</div>
+              <div class="lb-dept">${u.department||'RIUC'}</div>
+            </div>
+            <div class="lb-pts">${Math.max(5, 50-(i*4))} pts</div>
+          </div>`).join('') :
+          `<div class="empty"><span class="empty-icon">🏆</span><p>No data yet</p></div>`;
+      }).catch(()=>{ document.getElementById('lb-list').innerHTML=`<div class="empty"><p>Could not load leaderboard</p></div>`; });
+
+    } else if (currentDashTab === 'notifs') {
+      c.innerHTML = dashTabs + `
+        <div class="sec-title">Notifications</div>
+        ${notifications.length ? notifications.map(n=>`
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)">
+            <div style="font-size:1.3rem">${n.icon}</div>
+            <div>
+              <div style="font-size:13px;color:var(--t1)">${n.text}</div>
+              <div style="font-size:11px;color:var(--t3);margin-top:2px">${timeAgo(n.time)}</div>
+            </div>
+          </div>`).join('') :
+          `<div class="empty"><span class="empty-icon">🔔</span><h3>All clear</h3><p>No notifications yet.</p></div>`}`;
+    }
   }
 
   function logout() {
@@ -1799,171 +1744,134 @@
     localBookmarks.clear();
     localStorage.removeItem('bookmarks');
     document.getElementById('s-user').textContent = '—';
-    document.getElementById('nav-profile-label').textContent = 'Login';
+    document.getElementById('nav-dash-label').textContent = 'Login';
     document.getElementById('nav-admin').style.display = 'none';
-    switchNav('search');
+    switchNav('home');
     toast('👋 Logged out');
   }
 
-  // ── ADMIN ─────────────────────────────────────────────────────────────
-  let currentAdminTab = 'pending';
-
+  // ── ADMIN ──
   async function loadAdmin(tab) {
     currentAdminTab = tab || currentAdminTab;
-    const content = document.getElementById('admin-content');
-
+    const c = document.getElementById('admin-content');
     const tabs = `
-      <div class="admin-hero">
+      <div class="admin-top">
         <div>
           <h2>⚡ Admin Panel</h2>
-          <p>Manage papers, users and platform stats</p>
+          <p>Manage papers, users and stats</p>
         </div>
-
       </div>
       <div class="admin-tabs">
-        <button class="a-tab ${currentAdminTab==='pending'?'active':''}" onclick="loadAdmin('pending')">⏳ Pending</button>
-        <button class="a-tab ${currentAdminTab==='stats'?'active':''}"   onclick="loadAdmin('stats')">📊 Stats</button>
-        <button class="a-tab ${currentAdminTab==='users'?'active':''}"   onclick="loadAdmin('users')">👥 Users</button>
+        <button class="a-tab ${currentAdminTab==='pending'?'active':''}"  onclick="loadAdmin('pending')">⏳ Pending</button>
+        <button class="a-tab ${currentAdminTab==='stats'?'active':''}"    onclick="loadAdmin('stats')">📊 Stats</button>
+        <button class="a-tab ${currentAdminTab==='users'?'active':''}"    onclick="loadAdmin('users')">👥 Users</button>
       </div>`;
-
-    content.innerHTML = tabs + `<div class="skeleton" style="height:80px;border-radius:var(--rl);margin-bottom:10px"></div>`.repeat(3);
-
-    if (currentAdminTab === 'pending') await adminPending(content, tabs);
-    if (currentAdminTab === 'stats')   await adminStats(content, tabs);
-    if (currentAdminTab === 'users')   await adminUsers(content, tabs);
+    c.innerHTML = tabs + `<div class="skeleton" style="height:80px;border-radius:var(--rl);margin-bottom:9px"></div>`.repeat(3);
+    if (currentAdminTab==='pending') await adminPending(c, tabs);
+    if (currentAdminTab==='stats')   await adminStats(c, tabs);
+    if (currentAdminTab==='users')   await adminUsers(c, tabs);
   }
 
-  async function adminPending(content, tabs) {
+  async function adminPending(c, tabs) {
     try {
-      const res  = await fetch(`${API}/api/papers/admin/pending`, { headers: authHeaders() });
+      const res  = await fetch(`${API}/api/papers/admin/pending`, { headers:authHeaders() });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Unauthorized');
-      const papers = data.papers || data || [];
-
-      // Show dot if pending exist
+      if (!res.ok) throw new Error(data.error||'Unauthorized');
+      const papers = data.papers||[];
       const dot = document.getElementById('admin-dot');
       if (dot) dot.style.display = papers.length ? '' : 'none';
-
-      let html = tabs + `<div class="section-title">Pending Submissions (${papers.length})</div>`;
-      if (!papers.length) {
-        html += `<div class="empty"><span class="empty-icon">🎉</span><h3>All clear!</h3><p>No pending submissions right now.</p></div>`;
-      } else {
-        html += papers.map(p => `
-          <div class="pending-item" id="pi-${p.id}">
-            <div class="pi-top">
-              <div>
-                <div class="pi-title">${p.course_code} — ${p.course_name}</div>
-                <div class="pi-meta">${p.department} · ${p.year} · ${p.exam_type}</div>
-                <div class="pi-meta">by <strong style="color:var(--t1)">${p.uploader_name || 'Anonymous'}</strong></div>
-              </div>
-            </div>
-            <div class="pi-actions">
-              <button class="btn-approve" onclick="approvePaper(${p.id})">✓ Approve</button>
-              <button class="btn-reject"  onclick="rejectPaper(${p.id})">✕ Reject</button>
-              <a class="btn-view" href="${p.file_url}" target="_blank">📄 View</a>
-            </div>
-          </div>`).join('');
-      }
-      content.innerHTML = html;
-    } catch (err) {
-      content.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><h3>Error</h3><p>${err.message}</p></div>`;
-    }
+      c.innerHTML = tabs + `<div class="sec-title">Pending (${papers.length})</div>` + (papers.length ? papers.map(p=>`
+        <div class="pending-item" id="pi-${p.id}">
+          <div class="pi-title">${p.course_code} — ${p.course_name}</div>
+          <div class="pi-meta">${p.department} · ${p.year} · ${p.exam_type} · by <strong style="color:var(--t1)">${p.uploader_name||'Anonymous'}</strong></div>
+          <div class="pi-actions">
+            <button class="btn-approve" onclick="approvePaper(${p.id})">✓ Approve</button>
+            <button class="btn-reject"  onclick="rejectPaper(${p.id})">✕ Reject</button>
+            <a class="btn-viewfile" href="${p.file_url}" target="_blank">📄 View</a>
+          </div>
+        </div>`).join('') : `<div class="empty"><span class="empty-icon">🎉</span><h3>All clear!</h3><p>No pending submissions.</p></div>`);
+    } catch(err) { c.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`; }
   }
 
-  async function adminStats(content, tabs) {
+  async function adminStats(c, tabs) {
     try {
-      const [papersRes, usersRes] = await Promise.all([
-        fetch(`${API}/api/papers?limit=1`, { headers: authHeaders() }),
-        fetch(`${API}/api/users`,           { headers: authHeaders() }),
+      const [pr, ur, pend] = await Promise.all([
+        fetch(`${API}/api/papers?limit=1`).then(r=>r.json()),
+        fetch(`${API}/api/users`, {headers:authHeaders()}).then(r=>r.json()),
+        fetch(`${API}/api/papers/admin/pending`, {headers:authHeaders()}).then(r=>r.json()).catch(()=>({papers:[]}))
       ]);
-      const pd = await papersRes.json();
-      const ud = await usersRes.json();
-      const users   = ud.users || [];
-      const admins  = users.filter(u => u.is_admin).length;
-      const pending = (await fetch(`${API}/api/papers/admin/pending`, { headers: authHeaders() }).then(r => r.json()).catch(() => ({papers:[]}))).papers?.length || 0;
-
-      content.innerHTML = tabs + `
-        <div class="section-title">Platform Overview</div>
+      const users  = ur.users||[];
+      const admins = users.filter(u=>u.is_admin).length;
+      c.innerHTML = tabs + `
+        <div class="sec-title">Platform Overview</div>
         <div class="admin-stats-grid">
-          <div class="a-stat"><div class="a-stat-num gold">${pd.total || 0}</div><div class="a-stat-label">Approved Papers</div></div>
-          <div class="a-stat"><div class="a-stat-num purple">${pending}</div><div class="a-stat-label">Pending Review</div></div>
-          <div class="a-stat"><div class="a-stat-num teal">${users.length}</div><div class="a-stat-label">Total Users</div></div>
-          <div class="a-stat"><div class="a-stat-num pink">${admins}</div><div class="a-stat-label">Admins</div></div>
+          <div class="a-stat"><div class="a-stat-num blue">${pr.total||0}</div><div class="a-stat-label">Papers</div></div>
+          <div class="a-stat"><div class="a-stat-num yellow">${pend.papers?.length||0}</div><div class="a-stat-label">Pending</div></div>
+          <div class="a-stat"><div class="a-stat-num green">${users.length}</div><div class="a-stat-label">Users</div></div>
+          <div class="a-stat"><div class="a-stat-num red">${admins}</div><div class="a-stat-label">Admins</div></div>
         </div>`;
-    } catch (err) {
-      content.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`;
-    }
+    } catch(err) { c.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`; }
   }
 
-  async function adminUsers(content, tabs) {
+  async function adminUsers(c, tabs) {
     try {
-      const res  = await fetch(`${API}/api/users`, { headers: authHeaders() });
+      const res  = await fetch(`${API}/api/users`, {headers:authHeaders()});
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Unauthorized');
-      const users = data.users || [];
-      content.innerHTML = tabs + `
-        <div class="section-title">All Users (${users.length})</div>
-        <div>
-          ${users.map(u => `
-            <div class="user-item">
-              <div style="display:flex;align-items:center">
-                <div class="ui-avatar">${(u.profile_name||u.username||'?')[0].toUpperCase()}</div>
-                <div>
-                  <div class="ui-name">${u.profile_name || u.username}</div>
-                  <div class="ui-email">${u.email} · ${u.department || 'No dept'}</div>
-                </div>
+      if (!res.ok) throw new Error(data.error||'Unauthorized');
+      const users = data.users||[];
+      const colors = ['#1A56DB','#16A34A','#FBBF24','#7C3AED','#EC4899'];
+      c.innerHTML = tabs + `<div class="sec-title">All Users (${users.length})</div>` +
+        users.map((u,i)=>`
+          <div class="user-item">
+            <div class="ui-left">
+              <div class="ui-av" style="background:${colors[i%colors.length]}">${(u.profile_name||u.username||'?')[0].toUpperCase()}</div>
+              <div>
+                <div class="ui-name">${u.profile_name||u.username}</div>
+                <div class="ui-email">${u.email} · ${u.department||'No dept'}</div>
               </div>
-              <span class="badge ${u.is_admin ? 'badge-admin' : 'badge-student'}">${u.is_admin ? '⚡ Admin' : 'Student'}</span>
-            </div>`).join('')}
-        </div>`;
-    } catch (err) {
-      content.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`;
-    }
+            </div>
+            <span class="role-badge ${u.is_admin?'role-admin':'role-student'}">${u.is_admin?'Admin':'Student'}</span>
+          </div>`).join('');
+    } catch(err) { c.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`; }
   }
 
   async function approvePaper(id) {
     try {
-      const res = await fetch(`${API}/api/papers/${id}/approve`, { method: 'PUT', headers: authHeaders() });
+      const res = await fetch(`${API}/api/papers/${id}/approve`, {method:'PUT',headers:authHeaders()});
       if (!res.ok) throw new Error('Failed');
       document.getElementById(`pi-${id}`)?.remove();
       toast('✅ Paper approved!');
-      addNotification('✅', 'Paper approved successfully', 'approved');
-    } catch (err) { toast('❌ ' + err.message); }
+      addNotification('✅','Paper approved successfully','approved');
+    } catch(err) { toast('❌ '+err.message); }
   }
 
   async function rejectPaper(id) {
     const reason = prompt('Reason for rejection (optional):') || 'Does not meet requirements';
     try {
-      const res = await fetch(`${API}/api/papers/${id}/reject`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify({ reason }) });
+      const res = await fetch(`${API}/api/papers/${id}/reject`, {method:'PUT',headers:authHeaders(),body:JSON.stringify({reason})});
       if (!res.ok) throw new Error('Failed');
       document.getElementById(`pi-${id}`)?.remove();
       toast('🗑 Paper rejected');
-    } catch (err) { toast('❌ ' + err.message); }
+    } catch(err) { toast('❌ '+err.message); }
   }
 
-  // ── INIT ─────────────────────────────────────────────────────────────
+  // ── INIT ──
   window.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     loadLocalBookmarks();
-    fetchPapers(1);
     checkAdminNav();
+    loadHome();
 
     const user = getUser();
     if (user) {
-      document.getElementById('nav-profile-label').textContent = 'Profile';
-      document.getElementById('s-user').textContent = user.profile_name || user.username;
+      document.getElementById('nav-dash-label').textContent = 'Me';
+      document.getElementById('s-user').textContent = user.profile_name||user.username;
     }
 
-    // Close modals on backdrop click
     document.querySelectorAll('.modal-bg').forEach(bg => {
-      bg.addEventListener('click', e => {
-        if (e.target === bg) bg.classList.remove('open');
-      });
+      bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
     });
   });
 </script>
-
 </body>
 </html>
-
-
