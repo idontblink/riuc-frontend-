@@ -1301,10 +1301,10 @@
         </div>
 
         <div class="dl-btns">
-          <button class="btn-dl" onclick="downloadFile(fixCloudinaryUrl('${p.file_url}'),'${p.course_code}_${p.year}_question')">
+          <button class="btn-dl" onclick="downloadFile('${p.file_url}','${p.course_code}_${p.year}_question')">
             ⬇ Download Question
           </button>
-          ${hasAnswer ? `<button class="btn-dl-out" onclick="downloadFile(fixCloudinaryUrl('${p.answer_file_url}'),'${p.course_code}_${p.year}_answers')">📋 Answers</button>` : ''}
+          ${hasAnswer ? `<button class="btn-dl-out" onclick="downloadFile('${p.answer_file_url}','${p.course_code}_${p.year}_answers')">📋 Answers</button>` : ''}
         </div>
 
         <div class="sec-title">Comments (${comments.length})</div>
@@ -1334,37 +1334,37 @@
   // Fix Cloudinary URL — existing uploads are /image/upload/*.pdf (wrong)
   // New uploads will be /raw/upload/*.pdf (correct)
   // This function normalises both so preview and download always work
-  function fixCloudinaryUrl(url) {
-    if (!url) return url;
-    // If PDF stored as image type, convert to raw type URL
-    if (url.includes('/image/upload/') && url.toLowerCase().endsWith('.pdf')) {
-      return url.replace('/image/upload/', '/raw/upload/');
-    }
-    return url;
-  }
-
   function buildPreview(url, id) {
     if (!url) return '<div style="text-align:center;padding:2rem;color:var(--t3);font-size:13px">No file attached</div>';
 
-    const fixed = fixCloudinaryUrl(url);
-    const lower = fixed.toLowerCase();
-    const isPdf = lower.includes('.pdf') || lower.includes('/raw/');
-    const isImg = !isPdf && (lower.includes('.jpg') || lower.includes('.jpeg') || lower.includes('.png') || lower.includes('/image/'));
+    const lower = url.toLowerCase();
+    const isPdf = lower.includes('.pdf');
+    const isImg = !isPdf && (lower.includes('.jpg') || lower.includes('.jpeg') || lower.includes('.png'));
 
     if (isPdf) {
+      // Embed using <object> tag — works natively in all browsers for PDFs
+      // No third party service needed, no CORS issues
       return `
         <div class="preview-wrap">
-          <iframe
+          <object
+            data="${url}"
+            type="application/pdf"
             class="preview-pdf"
-            id="${id}"
-            src="${fixed}"
-            allowfullscreen
-            loading="lazy">
-          </iframe>
-          <div style="text-align:center;padding:0.75rem;background:var(--bg2);border-top:1px solid var(--border)">
-            <a href="${fixed}" target="_blank"
+            id="${id}">
+            <div style="text-align:center;padding:2rem;color:var(--t3)">
+              <div style="font-size:2rem;margin-bottom:8px">📄</div>
+              <p style="font-size:13px;margin-bottom:12px">PDF preview not supported in this browser.</p>
+              <a href="${url}" target="_blank"
+                style="color:var(--riuc-blue);font-weight:600;font-size:13px;text-decoration:none;
+                       background:rgba(26,86,219,0.1);padding:8px 16px;border-radius:8px;display:inline-block">
+                Open PDF →
+              </a>
+            </div>
+          </object>
+          <div style="text-align:center;padding:0.65rem;background:var(--bg2);border-top:1px solid var(--border)">
+            <a href="${url}" target="_blank"
                style="color:var(--riuc-blue);font-size:12px;font-weight:600;text-decoration:none">
-              ↗ Open in full screen
+              ↗ Open in new tab
             </a>
           </div>
         </div>`;
@@ -1373,16 +1373,15 @@
     if (isImg) {
       return `
         <div class="preview-wrap">
-          <img class="preview-img" src="${fixed}" alt="Paper preview"
-            onerror="this.parentElement.innerHTML='<div style=padding:2rem;text-align:center;color:var(--t3)>Could not load image</div>'">
+          <img class="preview-img" src="${url}" alt="Paper preview"
+            onerror="this.parentElement.innerHTML='<div style=padding:2rem;text-align:center;color:var(--t3)>Could not load image. <a href=${url} target=_blank style=color:var(--riuc-blue)>Open directly</a></div>'">
         </div>`;
     }
 
     return `
       <div style="text-align:center;padding:2rem;background:var(--bg2);border-radius:var(--r);margin-bottom:1rem">
         <div style="font-size:2.5rem;margin-bottom:8px">📎</div>
-        <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Preview not available.</p>
-        <a href="${fixed}" target="_blank"
+        <a href="${url}" target="_blank"
            style="color:var(--riuc-blue);font-weight:600;font-size:13px;text-decoration:none">
           Open file →
         </a>
@@ -1401,13 +1400,10 @@
   function downloadFile(url, filename) {
     if (!url) { toast('❌ No file available'); return; }
 
-    // Step 1: fix URL (convert image→raw for PDFs)
-    let dlUrl = fixCloudinaryUrl(url);
-
-    // Step 2: add fl_attachment so Cloudinary forces a download dialog
-    if (dlUrl.includes('cloudinary.com')) {
-      // Insert fl_attachment after /upload/ or /raw/
-      dlUrl = dlUrl.replace(/\/(upload|raw)\/(?!fl_attachment)/, '/$1/fl_attachment/');
+    // Add fl_attachment flag to Cloudinary URL — forces browser download dialog
+    let dlUrl = url;
+    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+      dlUrl = url.replace('/upload/', '/upload/fl_attachment/');
     }
 
     const a   = document.createElement('a');
