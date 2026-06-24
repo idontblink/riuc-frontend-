@@ -739,6 +739,98 @@
     }
     .logout-btn:hover { background: rgba(239,68,68,0.18); }
 
+
+    /* ── WELCOME / LANDING PAGE ── */
+    .welcome-view {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 2rem 1.5rem 4rem;
+      text-align: center;
+      position: relative; z-index: 1;
+    }
+    .welcome-logo {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: linear-gradient(135deg, var(--riuc-blue), var(--riuc-green));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: #fff;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 8px 32px rgba(26,86,219,0.4);
+      animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .welcome-school {
+      font-size: 11px; font-weight: 600; color: var(--riuc-blue);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 0.85rem;
+      animation: fadeUp 0.5s ease 0.25s both;
+    }
+    .welcome-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 7vw, 2.8rem);
+      font-weight: 800; line-height: 1.12;
+      color: var(--t1); margin-bottom: 0.85rem;
+      animation: fadeUp 0.5s ease 0.35s both;
+    }
+    .welcome-title em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--riuc-blue), var(--riuc-green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome-desc {
+      font-size: 15px; color: var(--t2); line-height: 1.7;
+      max-width: 380px; margin: 0 auto 2rem;
+      animation: fadeUp 0.5s ease 0.45s both;
+    }
+    .welcome-desc strong { color: var(--t1); font-weight: 600; }
+    .welcome-actions {
+      display: flex; flex-direction: column; gap: 10px;
+      width: 100%; max-width: 340px;
+      animation: fadeUp 0.5s ease 0.55s both;
+    }
+    .btn-welcome-primary {
+      width: 100%; background: var(--riuc-blue); color: #fff;
+      border: none; border-radius: var(--rl); padding: 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 6px 20px rgba(26,86,219,0.4);
+    }
+    .btn-welcome-primary:hover { background: var(--riuc-blue2); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(26,86,219,0.5); }
+    .btn-welcome-secondary {
+      width: 100%; background: var(--card); border: 1px solid var(--border);
+      color: var(--t1); border-radius: var(--rl); padding: 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.25s; backdrop-filter: blur(10px);
+    }
+    .btn-welcome-secondary:hover { background: var(--card-hover); transform: translateY(-1px); }
+    .welcome-features {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 10px; width: 100%; max-width: 380px;
+      margin-top: 2.5rem;
+      animation: fadeUp 0.5s ease 0.65s both;
+    }
+    .welcome-feat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--rl); padding: 1rem 0.75rem;
+      backdrop-filter: blur(14px);
+    }
+    .welcome-feat-icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .welcome-feat-text { font-size: 11px; color: var(--t2); line-height: 1.4; font-weight: 500; }
+    .welcome-footer {
+      margin-top: 2rem; font-size: 11px; color: var(--t3);
+      animation: fadeUp 0.5s ease 0.75s both;
+    }
+    .welcome-footer a { color: var(--riuc-blue); cursor: pointer; }
+
+    /* ── AUTH MODAL (full sheet) ── */
+    .auth-modal {
+      background: #0c1a2e;
+    }
+
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
@@ -757,6 +849,58 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+
+<!-- WELCOME / LANDING PAGE (shown to logged out users) -->
+<div id="welcome-page" style="display:none">
+  <div class="bg-wrap" style="position:fixed">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="welcome-view">
+    <div class="welcome-logo">PR</div>
+    <div class="welcome-school">Rosebank International University College</div>
+    <h1 class="welcome-title">Past papers,<br><em>finally organised.</em></h1>
+    <p class="welcome-desc">
+      <strong>PastPapers RIUC</strong> is a student-built platform where RIUC students share and access past exam questions — for free, forever.
+    </p>
+    <div class="welcome-actions">
+      <button class="btn-welcome-primary" onclick="showAuthModal('register')">
+        Create a Free Account
+      </button>
+      <button class="btn-welcome-secondary" onclick="showAuthModal('login')">
+        Log In
+      </button>
+    </div>
+    <div class="welcome-features">
+      <div class="welcome-feat">
+        <div class="welcome-feat-icon">📄</div>
+        <div class="welcome-feat-text">Past exam papers from all RIUC faculties</div>
+      </div>
+      <div class="welcome-feat">
+        <div class="welcome-feat-icon">📌</div>
+        <div class="welcome-feat-text">Save and organise papers for later</div>
+      </div>
+      <div class="welcome-feat">
+        <div class="welcome-feat-icon">🏆</div>
+        <div class="welcome-feat-text">Earn points for every paper you share</div>
+      </div>
+    </div>
+    <div class="welcome-footer">
+      Built by RIUC students, for RIUC students.<br>
+      Already have an account? <a onclick="showAuthModal('login')">Log in here</a>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL (login/register sheet) -->
+<div class="modal-bg" id="auth-modal">
+  <div class="modal auth-modal">
+    <div class="modal-handle"></div>
+    <div id="auth-modal-content"></div>
+  </div>
+</div>
 
 <div class="app">
   <!-- HEADER -->
@@ -1786,8 +1930,8 @@
     document.getElementById('s-user').textContent = '—';
     document.getElementById('nav-dash-label').textContent = 'Login';
     document.getElementById('nav-admin').style.display = 'none';
-    switchNav('home');
-    toast('👋 Logged out');
+    showWelcomePage();
+    toast('👋 Logged out. See you soon!');
   }
 
   // ── ADMIN ──
@@ -1895,19 +2039,162 @@
     } catch(err) { toast('❌ '+err.message); }
   }
 
+
+  // ── WELCOME PAGE ─────────────────────────────────────────────────
+  function showWelcomePage() {
+    document.getElementById('welcome-page').style.display = 'block';
+    document.querySelector('.app').style.display = 'none';
+    document.querySelector('.bottom-nav').style.display = 'none';
+    document.querySelector('.toast').style.display = 'none';
+  }
+
+  function showMainApp() {
+    document.getElementById('welcome-page').style.display = 'none';
+    document.querySelector('.app').style.display = 'block';
+    document.querySelector('.bottom-nav').style.display = 'flex';
+    document.querySelector('.toast').style.display = 'block';
+  }
+
+  function showAuthModal(mode) {
+    const modal   = document.getElementById('auth-modal');
+    const content = document.getElementById('auth-modal-content');
+    modal.classList.add('open');
+    renderAuthModal(mode, content);
+  }
+
+  function closeAuthModal() {
+    document.getElementById('auth-modal').classList.remove('open');
+  }
+
+  function renderAuthModal(mode, container) {
+    if (!container) container = document.getElementById('auth-modal-content');
+    if (mode === 'login') {
+      container.innerHTML = `
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;color:var(--t1);margin-bottom:0.3rem">Good to see you 👋</h2>
+        <p style="font-size:13px;color:var(--t2);margin-bottom:1.25rem">Log in to access past papers.</p>
+        <div id="auth-modal-alert"></div>
+        <div class="form-group"><label>Email</label><input class="form-input" id="am-email" type="email" placeholder="your@email.com"></div>
+        <div class="form-group"><label>Password</label><input class="form-input" id="am-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doModalLogin()"></div>
+        <button class="btn-submit" style="width:100%;padding:13px;margin-top:4px;font-size:14px" onclick="doModalLogin()">Log in</button>
+        <div style="text-align:center;font-size:12px;color:var(--t2);margin-top:1.1rem">
+          No account? <a style="color:var(--riuc-blue);cursor:pointer;font-weight:600" onclick="renderAuthModal('register')">Create one — it's free</a>
+        </div>
+        <button class="btn-cancel" style="width:100%;margin-top:10px" onclick="closeAuthModal()">Cancel</button>`;
+    } else {
+      container.innerHTML = `
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;color:var(--t1);margin-bottom:0.3rem">Join PastPapers RIUC</h2>
+        <p style="font-size:13px;color:var(--t2);margin-bottom:1.25rem">Free access to all past papers. Takes 30 seconds.</p>
+        <div id="auth-modal-alert"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Username *</label><input class="form-input" id="am-username" placeholder="john_doe"></div>
+          <div class="form-group"><label>Display Name</label><input class="form-input" id="am-displayname" placeholder="John Doe"></div>
+        </div>
+        <div class="form-group"><label>Email *</label><input class="form-input" id="am-email" type="email" placeholder="your@riuc.edu.gh"></div>
+        <div class="form-group"><label>Password *</label><input class="form-input" id="am-pass" type="password" placeholder="Min 6 characters"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Faculty</label>
+            <select class="form-input" id="am-dept">
+              <option value="">Select...</option>
+              <option value="Faculty of Information and Communications Technology">Faculty of ICT</option>
+              <option value="Faculty of Commerce">Faculty of Commerce</option>
+              <option value="Faculty of Hospitality, Culinary and Service">Faculty of Hospitality</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Level</label>
+            <select class="form-input" id="am-level">
+              <option value="">Select...</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="300">300</option>
+              <option value="400">400</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-submit" style="width:100%;padding:13px;margin-top:4px;font-size:14px" onclick="doModalRegister()">Create Account</button>
+        <div style="text-align:center;font-size:12px;color:var(--t2);margin-top:1.1rem">
+          Already have an account? <a style="color:var(--riuc-blue);cursor:pointer;font-weight:600" onclick="renderAuthModal('login')">Log in</a>
+        </div>
+        <button class="btn-cancel" style="width:100%;margin-top:10px" onclick="closeAuthModal()">Cancel</button>`;
+    }
+  }
+
+  function setModalAlert(msg, type) {
+    const el = document.getElementById('auth-modal-alert');
+    if (el) el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  }
+
+  async function doModalLogin() {
+    const email    = document.getElementById('am-email')?.value?.trim();
+    const password = document.getElementById('am-pass')?.value;
+    if (!email || !password) { setModalAlert('Fill in all fields.', 'error'); return; }
+    try {
+      const res  = await fetch(`${API}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      saveAuth(data.token, data.user);
+      closeAuthModal();
+      onAuthSuccess(data.user);
+    } catch (err) { setModalAlert(err.message, 'error'); }
+  }
+
+  async function doModalRegister() {
+    const username     = document.getElementById('am-username')?.value?.trim();
+    const profile_name = document.getElementById('am-displayname')?.value?.trim();
+    const email        = document.getElementById('am-email')?.value?.trim();
+    const password     = document.getElementById('am-pass')?.value;
+    const department   = document.getElementById('am-dept')?.value;
+    const level        = document.getElementById('am-level')?.value;
+    if (!username || !email || !password) { setModalAlert('Fill in required fields.', 'error'); return; }
+    if (password.length < 6) { setModalAlert('Password must be at least 6 characters.', 'error'); return; }
+    try {
+      const res  = await fetch(`${API}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, profile_name, department, level: parseInt(level) || null })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Registration failed');
+      saveAuth(data.token, data.user);
+      closeAuthModal();
+      onAuthSuccess(data.user);
+    } catch (err) { setModalAlert(err.message, 'error'); }
+  }
+
+  function onAuthSuccess(user) {
+    document.getElementById('nav-dash-label').textContent = 'Me';
+    document.getElementById('s-user').textContent = user.profile_name || user.username;
+    checkAdminNav();
+    showMainApp();
+    loadTheme();
+    loadHome();
+    toast('🎉 Welcome, ' + (user.profile_name || user.username) + '!');
+  }
+
   // ── INIT ──
   window.addEventListener('DOMContentLoaded', () => {
     loadTheme();
     loadLocalBookmarks();
-    checkAdminNav();
-    loadHome();
 
     const user = getUser();
-    if (user) {
+    if (!user || !getToken()) {
+      // Not logged in — show welcome page
+      showWelcomePage();
+    } else {
+      // Logged in — go straight to app
+      showMainApp();
       document.getElementById('nav-dash-label').textContent = 'Me';
-      document.getElementById('s-user').textContent = user.profile_name||user.username;
+      document.getElementById('s-user').textContent = user.profile_name || user.username;
+      checkAdminNav();
+      loadHome();
     }
 
+    // Close modals on backdrop click
     document.querySelectorAll('.modal-bg').forEach(bg => {
       bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
     });
