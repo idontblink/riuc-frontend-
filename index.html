@@ -1046,6 +1046,66 @@
   </button>
 </nav>
 
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Edit Profile</h2>
+    <div id="edit-alert"></div>
+    <div class="form-group">
+      <label>Display Name</label>
+      <input class="form-input" id="edit-displayname" placeholder="Your full name">
+    </div>
+    <div class="form-group">
+      <label>Username</label>
+      <input class="form-input" id="edit-username" placeholder="your_username">
+    </div>
+    <div class="form-group">
+      <label>Faculty</label>
+      <select class="form-input" id="edit-dept">
+        <option value="">Select faculty...</option>
+        <option value="Faculty of Information and Communications Technology">Faculty of ICT</option>
+        <option value="Faculty of Commerce">Faculty of Commerce</option>
+        <option value="Faculty of Hospitality, Culinary and Service">Faculty of Hospitality</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Level</label>
+      <select class="form-input" id="edit-level">
+        <option value="">Select level...</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-submit" onclick="saveProfile()">Save Changes</button>
+    </div>
+
+    <!-- Password section -->
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:1rem">Change Password</div>
+      <div id="pw-alert"></div>
+      <div class="form-group">
+        <label>Current Password</label>
+        <input class="form-input" id="edit-current-pw" type="password" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input class="form-input" id="edit-new-pw" type="password" placeholder="Min 6 characters">
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input class="form-input" id="edit-confirm-pw" type="password" placeholder="Repeat new password">
+      </div>
+      <button class="btn-submit" style="width:100%" onclick="savePassword()">Update Password</button>
+    </div>
+  </div>
+</div>
+
 <!-- UPLOAD MODAL -->
 <div class="modal-bg" id="upload-modal">
   <div class="modal">
@@ -1878,6 +1938,9 @@
               <div class="badge-name">${b.name}</div>
             </div>`).join('')}
         </div>
+        <button class="btn-primary" style="width:100%;margin-bottom:10px" onclick="openEditModal()">
+          ✏️ Edit Profile
+        </button>
         <button class="logout-btn" onclick="logout()">Log out</button>`;
 
       // Fetch real upload count
@@ -2014,7 +2077,17 @@
                 <div class="ui-email">${u.email} · ${u.department||'No dept'}</div>
               </div>
             </div>
-            <span class="role-badge ${u.is_admin?'role-admin':'role-student'}">${u.is_admin?'Admin':'Student'}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="role-badge ${u.is_admin?'role-admin':'role-student'}">${u.is_admin?'Admin':'Student'}</span>
+              ${u.id !== ${JSON.stringify(getUser()?.id)} ? `
+                <button onclick="toggleAdmin(${u.id},${!u.is_admin})"
+                  style="font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;border:1px solid;transition:all 0.2s;
+                  ${u.is_admin
+                    ? 'background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:#f87171'
+                    : 'background:rgba(26,86,219,0.1);border-color:rgba(26,86,219,0.25);color:var(--riuc-blue)'}">
+                  ${u.is_admin ? 'Remove Admin' : 'Make Admin'}
+                </button>` : ''}
+            </div>
           </div>`).join('');
     } catch(err) { c.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`; }
   }
@@ -2037,6 +2110,119 @@
       document.getElementById(`pi-${id}`)?.remove();
       toast('🗑 Paper rejected');
     } catch(err) { toast('❌ '+err.message); }
+  }
+
+
+
+  // ── PROFILE EDITING ──────────────────────────────────────────────────
+  function openEditModal() {
+    const user = getUser();
+    if (!user) return;
+    document.getElementById('edit-displayname').value = user.profile_name || '';
+    document.getElementById('edit-username').value    = user.username || '';
+    document.getElementById('edit-dept').value        = user.department || '';
+    document.getElementById('edit-level').value       = user.level || '';
+    document.getElementById('edit-alert').innerHTML   = '';
+    document.getElementById('pw-alert').innerHTML     = '';
+    document.getElementById('edit-current-pw').value  = '';
+    document.getElementById('edit-new-pw').value      = '';
+    document.getElementById('edit-confirm-pw').value  = '';
+    document.getElementById('edit-modal').classList.add('open');
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+  }
+
+  async function saveProfile() {
+    const profile_name = document.getElementById('edit-displayname').value.trim();
+    const username     = document.getElementById('edit-username').value.trim();
+    const department   = document.getElementById('edit-dept').value;
+    const level        = document.getElementById('edit-level').value;
+
+    if (!profile_name && !username) {
+      document.getElementById('edit-alert').innerHTML = '<div class="alert alert-error">Fill in at least one field</div>';
+      return;
+    }
+
+    try {
+      const res  = await fetch(`${API}/api/users/me`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ profile_name, username, department, level })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Update failed');
+
+      // Update stored user
+      const user = getUser();
+      const updated = { ...user, ...data.user };
+      localStorage.setItem('riu_user', JSON.stringify(updated));
+
+      // Update header display
+      document.getElementById('s-user').textContent = updated.profile_name || updated.username;
+
+      document.getElementById('edit-alert').innerHTML = '<div class="alert alert-success">✅ Profile updated!</div>';
+      toast('✅ Profile saved!');
+
+      // Refresh dashboard
+      setTimeout(() => { closeEditModal(); loadDashboard('profile'); }, 1200);
+    } catch (err) {
+      document.getElementById('edit-alert').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+  }
+
+  async function savePassword() {
+    const current  = document.getElementById('edit-current-pw').value;
+    const newPw    = document.getElementById('edit-new-pw').value;
+    const confirm  = document.getElementById('edit-confirm-pw').value;
+
+    if (!current || !newPw || !confirm) {
+      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-error">Fill in all password fields</div>';
+      return;
+    }
+    if (newPw !== confirm) {
+      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-error">New passwords do not match</div>';
+      return;
+    }
+    if (newPw.length < 6) {
+      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-error">Password must be at least 6 characters</div>';
+      return;
+    }
+
+    try {
+      const res  = await fetch(`${API}/api/users/me/password`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ current_password: current, new_password: newPw })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-success">✅ Password changed!</div>';
+      document.getElementById('edit-current-pw').value = '';
+      document.getElementById('edit-new-pw').value     = '';
+      document.getElementById('edit-confirm-pw').value = '';
+      toast('🔒 Password updated!');
+    } catch (err) {
+      document.getElementById('pw-alert').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+  }
+
+  // ── ADMIN PROMOTION ───────────────────────────────────────────────────
+  async function toggleAdmin(userId, makeAdmin) {
+    const action = makeAdmin ? 'make-admin' : 'remove-admin';
+    const label  = makeAdmin ? 'promote to admin' : 'remove admin access';
+    if (!confirm(`Are you sure you want to ${label} for this user?`)) return;
+    try {
+      const res  = await fetch(`${API}/api/users/${userId}/${action}`, {
+        method: 'PATCH', headers: authHeaders()
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      toast(makeAdmin ? '⚡ User promoted to admin!' : '👤 Admin access removed');
+      loadAdmin('users'); // refresh users tab
+    } catch (err) { toast('❌ ' + err.message); }
   }
 
 
