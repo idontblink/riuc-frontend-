@@ -1280,30 +1280,48 @@
 
   async function loadHomeStats() {
     try {
-      const [papersRes, usersRes] = await Promise.all([
-        fetch(`${API}/api/papers?limit=1`),
-        fetch(`${API}/api/users`, { headers: authHeaders() }).catch(() => ({ json: () => ({ users: [] }) }))
-      ]);
-      const pd = await papersRes.json();
-      document.getElementById('st-papers').textContent   = pd.total || 0;
-      document.getElementById('s-total').textContent     = pd.total || 0;
-      // Estimate courses from papers
-      document.getElementById('st-courses').textContent  = '—';
-      document.getElementById('st-students').textContent = '—';
+      // Papers count — always public
+      const papersRes  = await fetch(`${API}/api/papers?limit=1`);
+      const papersData = await papersRes.json();
+      const total      = papersData.total || 0;
+
+      const stPapers  = document.getElementById('st-papers');
+      const sTotal    = document.getElementById('s-total');
+      const stCourses = document.getElementById('st-courses');
+      const stStudents= document.getElementById('st-students');
+
+      if (stPapers)   stPapers.textContent   = total;
+      if (sTotal)     sTotal.textContent      = total;
+      if (stCourses)  stCourses.textContent   = '35+';
+
+      // Students count — only if admin, otherwise hide
       if (isLoggedIn()) {
         try {
-          const ud = await (await fetch(`${API}/api/users`, { headers: authHeaders() })).json();
-          document.getElementById('st-students').textContent = (ud.users || []).length;
-        } catch {}
+          const usersRes  = await fetch(`${API}/api/users`, { headers: authHeaders() });
+          if (usersRes.ok) {
+            const usersData = await usersRes.json();
+            if (stStudents) stStudents.textContent = (usersData.users || []).length;
+          } else {
+            if (stStudents) stStudents.textContent = '—';
+          }
+        } catch {
+          if (stStudents) stStudents.textContent = '—';
+        }
+      } else {
+        if (stStudents) stStudents.textContent = '—';
       }
-    } catch {}
+    } catch (err) {
+      console.error('loadHomeStats failed:', err);
+    }
   }
 
   async function loadActivityFeed() {
     const feed = document.getElementById('activity-feed');
+    if (!feed) return;
     try {
       const res  = await fetch(`${API}/api/papers?limit=5&sort=recent`);
-      const data = await res.json();
+      if (!res.ok) throw new Error('Failed');
+      const data   = await res.json();
       const papers = data.papers || [];
       if (!papers.length) {
         feed.innerHTML = '<div class="empty"><span class="empty-icon">📭</span><p>No activity yet. Be the first to upload!</p></div>';
@@ -1311,36 +1329,44 @@
       }
       const colors = ['#1A56DB','#16A34A','#FBBF24','#7C3AED','#EC4899'];
       feed.innerHTML = papers.map((p, i) => `
-        <div class="feed-item" style="animation-delay:${i*0.06}s" onclick="viewPaper(${p.id})">
-          <div class="feed-avatar" style="background:${colors[i%colors.length]}">
+        <div class="feed-item" style="animation-delay:${i*0.06}s;cursor:pointer" onclick="viewPaper(${p.id})">
+          <div class="feed-avatar" style="background:${colors[i%colors.length]};border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">
             ${(p.uploader_name||'S')[0].toUpperCase()}
           </div>
-          <div class="feed-text">
-            <strong>${p.uploader_name || 'A student'}</strong>
-            <span> uploaded </span>
-            <span class="feed-code">${p.course_code}</span>
-            <br><span>${p.course_name} · ${p.exam_type}</span>
+          <div class="feed-text" style="flex:1">
+            <div style="font-size:13px;color:var(--t1)">
+              <strong>${p.uploader_name || 'A student'}</strong>
+              <span style="color:var(--t2)"> uploaded </span>
+              <span class="feed-code">${p.course_code}</span>
+            </div>
+            <div style="font-size:12px;color:var(--t2);margin-top:2px">${p.course_name} · ${p.exam_type}</div>
           </div>
-          <div class="feed-time">${timeAgo(new Date(p.created_at).getTime())}</div>
+          <div style="font-size:11px;color:var(--t3);flex-shrink:0">${timeAgo(new Date(p.created_at).getTime())}</div>
         </div>`).join('');
-    } catch {
-      feed.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span><p>Could not load activity</p></div>';
+    } catch (err) {
+      console.error('loadActivityFeed failed:', err);
+      if (feed) feed.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span><p>Could not load activity</p></div>';
     }
   }
 
   async function loadHomeLeaderboard() {
     const el = document.getElementById('home-leaderboard');
+    if (!el) return;
+    if (!isLoggedIn()) {
+      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Log in to see the leaderboard</div>';
+      return;
+    }
     try {
       const res  = await fetch(`${API}/api/users`, { headers: authHeaders() });
       if (!res.ok) throw new Error();
-      const data = await res.json();
+      const data  = await res.json();
       const users = (data.users || []).slice(0, 3);
-      const rankColors = ['gold','silver','bronze'];
-      const rankSymbols = ['🥇','🥈','🥉'];
-      const colors = ['#1A56DB','#16A34A','#FBBF24'];
+      const symbols = ['🥇','🥈','🥉'];
+      const colors  = ['#1A56DB','#16A34A','#FBBF24'];
+      const ranks   = ['gold','silver','bronze'];
       el.innerHTML = users.length ? users.map((u, i) => `
         <div class="lb-item">
-          <div class="lb-rank ${rankColors[i]}">${rankSymbols[i]}</div>
+          <div class="lb-rank ${ranks[i]}">${symbols[i]}</div>
           <div class="lb-av" style="background:${colors[i]}">${(u.profile_name||u.username||'?')[0].toUpperCase()}</div>
           <div style="flex:1">
             <div class="lb-name">${u.profile_name || u.username}</div>
@@ -1350,7 +1376,7 @@
         </div>`).join('') :
         '<div class="empty"><span class="empty-icon">🏆</span><p>No contributors yet</p></div>';
     } catch {
-      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Log in to see the leaderboard</div>';
+      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Could not load</div>';
     }
   }
 
