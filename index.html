@@ -1046,66 +1046,6 @@
   </button>
 </nav>
 
-
-<!-- EDIT PROFILE MODAL -->
-<div class="modal-bg" id="edit-modal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <h2>Edit Profile</h2>
-    <div id="edit-alert"></div>
-    <div class="form-group">
-      <label>Display Name</label>
-      <input class="form-input" id="edit-displayname" placeholder="Your full name">
-    </div>
-    <div class="form-group">
-      <label>Username</label>
-      <input class="form-input" id="edit-username" placeholder="your_username">
-    </div>
-    <div class="form-group">
-      <label>Faculty</label>
-      <select class="form-input" id="edit-dept">
-        <option value="">Select faculty...</option>
-        <option value="Faculty of Information and Communications Technology">Faculty of ICT</option>
-        <option value="Faculty of Commerce">Faculty of Commerce</option>
-        <option value="Faculty of Hospitality, Culinary and Service">Faculty of Hospitality</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Level</label>
-      <select class="form-input" id="edit-level">
-        <option value="">Select level...</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-        <option value="300">300</option>
-        <option value="400">400</option>
-      </select>
-    </div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-      <button class="btn-submit" onclick="saveProfile()">Save Changes</button>
-    </div>
-
-    <!-- Password section -->
-    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
-      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:1rem">Change Password</div>
-      <div id="pw-alert"></div>
-      <div class="form-group">
-        <label>Current Password</label>
-        <input class="form-input" id="edit-current-pw" type="password" placeholder="••••••••">
-      </div>
-      <div class="form-group">
-        <label>New Password</label>
-        <input class="form-input" id="edit-new-pw" type="password" placeholder="Min 6 characters">
-      </div>
-      <div class="form-group">
-        <label>Confirm New Password</label>
-        <input class="form-input" id="edit-confirm-pw" type="password" placeholder="Repeat new password">
-      </div>
-      <button class="btn-submit" style="width:100%" onclick="savePassword()">Update Password</button>
-    </div>
-  </div>
-</div>
-
 <!-- UPLOAD MODAL -->
 <div class="modal-bg" id="upload-modal">
   <div class="modal">
@@ -1280,48 +1220,30 @@
 
   async function loadHomeStats() {
     try {
-      // Papers count — always public
-      const papersRes  = await fetch(`${API}/api/papers?limit=1`);
-      const papersData = await papersRes.json();
-      const total      = papersData.total || 0;
-
-      const stPapers  = document.getElementById('st-papers');
-      const sTotal    = document.getElementById('s-total');
-      const stCourses = document.getElementById('st-courses');
-      const stStudents= document.getElementById('st-students');
-
-      if (stPapers)   stPapers.textContent   = total;
-      if (sTotal)     sTotal.textContent      = total;
-      if (stCourses)  stCourses.textContent   = '35+';
-
-      // Students count — only if admin, otherwise hide
+      const [papersRes, usersRes] = await Promise.all([
+        fetch(`${API}/api/papers?limit=1`),
+        fetch(`${API}/api/users`, { headers: authHeaders() }).catch(() => ({ json: () => ({ users: [] }) }))
+      ]);
+      const pd = await papersRes.json();
+      document.getElementById('st-papers').textContent   = pd.total || 0;
+      document.getElementById('s-total').textContent     = pd.total || 0;
+      // Estimate courses from papers
+      document.getElementById('st-courses').textContent  = '—';
+      document.getElementById('st-students').textContent = '—';
       if (isLoggedIn()) {
         try {
-          const usersRes  = await fetch(`${API}/api/users`, { headers: authHeaders() });
-          if (usersRes.ok) {
-            const usersData = await usersRes.json();
-            if (stStudents) stStudents.textContent = (usersData.users || []).length;
-          } else {
-            if (stStudents) stStudents.textContent = '—';
-          }
-        } catch {
-          if (stStudents) stStudents.textContent = '—';
-        }
-      } else {
-        if (stStudents) stStudents.textContent = '—';
+          const ud = await (await fetch(`${API}/api/users`, { headers: authHeaders() })).json();
+          document.getElementById('st-students').textContent = (ud.users || []).length;
+        } catch {}
       }
-    } catch (err) {
-      console.error('loadHomeStats failed:', err);
-    }
+    } catch {}
   }
 
   async function loadActivityFeed() {
     const feed = document.getElementById('activity-feed');
-    if (!feed) return;
     try {
       const res  = await fetch(`${API}/api/papers?limit=5&sort=recent`);
-      if (!res.ok) throw new Error('Failed');
-      const data   = await res.json();
+      const data = await res.json();
       const papers = data.papers || [];
       if (!papers.length) {
         feed.innerHTML = '<div class="empty"><span class="empty-icon">📭</span><p>No activity yet. Be the first to upload!</p></div>';
@@ -1329,44 +1251,36 @@
       }
       const colors = ['#1A56DB','#16A34A','#FBBF24','#7C3AED','#EC4899'];
       feed.innerHTML = papers.map((p, i) => `
-        <div class="feed-item" style="animation-delay:${i*0.06}s;cursor:pointer" onclick="viewPaper(${p.id})">
-          <div class="feed-avatar" style="background:${colors[i%colors.length]};border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">
+        <div class="feed-item" style="animation-delay:${i*0.06}s" onclick="viewPaper(${p.id})">
+          <div class="feed-avatar" style="background:${colors[i%colors.length]}">
             ${(p.uploader_name||'S')[0].toUpperCase()}
           </div>
-          <div class="feed-text" style="flex:1">
-            <div style="font-size:13px;color:var(--t1)">
-              <strong>${p.uploader_name || 'A student'}</strong>
-              <span style="color:var(--t2)"> uploaded </span>
-              <span class="feed-code">${p.course_code}</span>
-            </div>
-            <div style="font-size:12px;color:var(--t2);margin-top:2px">${p.course_name} · ${p.exam_type}</div>
+          <div class="feed-text">
+            <strong>${p.uploader_name || 'A student'}</strong>
+            <span> uploaded </span>
+            <span class="feed-code">${p.course_code}</span>
+            <br><span>${p.course_name} · ${p.exam_type}</span>
           </div>
-          <div style="font-size:11px;color:var(--t3);flex-shrink:0">${timeAgo(new Date(p.created_at).getTime())}</div>
+          <div class="feed-time">${timeAgo(new Date(p.created_at).getTime())}</div>
         </div>`).join('');
-    } catch (err) {
-      console.error('loadActivityFeed failed:', err);
-      if (feed) feed.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span><p>Could not load activity</p></div>';
+    } catch {
+      feed.innerHTML = '<div class="empty"><span class="empty-icon">⚠️</span><p>Could not load activity</p></div>';
     }
   }
 
   async function loadHomeLeaderboard() {
     const el = document.getElementById('home-leaderboard');
-    if (!el) return;
-    if (!isLoggedIn()) {
-      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Log in to see the leaderboard</div>';
-      return;
-    }
     try {
       const res  = await fetch(`${API}/api/users`, { headers: authHeaders() });
       if (!res.ok) throw new Error();
-      const data  = await res.json();
+      const data = await res.json();
       const users = (data.users || []).slice(0, 3);
-      const symbols = ['🥇','🥈','🥉'];
-      const colors  = ['#1A56DB','#16A34A','#FBBF24'];
-      const ranks   = ['gold','silver','bronze'];
+      const rankColors = ['gold','silver','bronze'];
+      const rankSymbols = ['🥇','🥈','🥉'];
+      const colors = ['#1A56DB','#16A34A','#FBBF24'];
       el.innerHTML = users.length ? users.map((u, i) => `
         <div class="lb-item">
-          <div class="lb-rank ${ranks[i]}">${symbols[i]}</div>
+          <div class="lb-rank ${rankColors[i]}">${rankSymbols[i]}</div>
           <div class="lb-av" style="background:${colors[i]}">${(u.profile_name||u.username||'?')[0].toUpperCase()}</div>
           <div style="flex:1">
             <div class="lb-name">${u.profile_name || u.username}</div>
@@ -1376,7 +1290,7 @@
         </div>`).join('') :
         '<div class="empty"><span class="empty-icon">🏆</span><p>No contributors yet</p></div>';
     } catch {
-      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Could not load</div>';
+      el.innerHTML = '<div style="font-size:13px;color:var(--t3);text-align:center;padding:1rem">Log in to see the leaderboard</div>';
     }
   }
 
@@ -1964,9 +1878,6 @@
               <div class="badge-name">${b.name}</div>
             </div>`).join('')}
         </div>
-        <button class="btn-primary" style="width:100%;margin-bottom:10px" onclick="openEditModal()">
-          ✏️ Edit Profile
-        </button>
         <button class="logout-btn" onclick="logout()">Log out</button>`;
 
       // Fetch real upload count
@@ -2103,17 +2014,7 @@
                 <div class="ui-email">${u.email} · ${u.department||'No dept'}</div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span class="role-badge ${u.is_admin?'role-admin':'role-student'}">${u.is_admin?'Admin':'Student'}</span>
-              ${u.id !== ${JSON.stringify(getUser()?.id)} ? `
-                <button onclick="toggleAdmin(${u.id},${!u.is_admin})"
-                  style="font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;border:1px solid;transition:all 0.2s;
-                  ${u.is_admin
-                    ? 'background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.25);color:#f87171'
-                    : 'background:rgba(26,86,219,0.1);border-color:rgba(26,86,219,0.25);color:var(--riuc-blue)'}">
-                  ${u.is_admin ? 'Remove Admin' : 'Make Admin'}
-                </button>` : ''}
-            </div>
+            <span class="role-badge ${u.is_admin?'role-admin':'role-student'}">${u.is_admin?'Admin':'Student'}</span>
           </div>`).join('');
     } catch(err) { c.innerHTML = tabs + `<div class="empty"><span class="empty-icon">⚠️</span><p>${err.message}</p></div>`; }
   }
@@ -2136,119 +2037,6 @@
       document.getElementById(`pi-${id}`)?.remove();
       toast('🗑 Paper rejected');
     } catch(err) { toast('❌ '+err.message); }
-  }
-
-
-
-  // ── PROFILE EDITING ──────────────────────────────────────────────────
-  function openEditModal() {
-    const user = getUser();
-    if (!user) return;
-    document.getElementById('edit-displayname').value = user.profile_name || '';
-    document.getElementById('edit-username').value    = user.username || '';
-    document.getElementById('edit-dept').value        = user.department || '';
-    document.getElementById('edit-level').value       = user.level || '';
-    document.getElementById('edit-alert').innerHTML   = '';
-    document.getElementById('pw-alert').innerHTML     = '';
-    document.getElementById('edit-current-pw').value  = '';
-    document.getElementById('edit-new-pw').value      = '';
-    document.getElementById('edit-confirm-pw').value  = '';
-    document.getElementById('edit-modal').classList.add('open');
-  }
-
-  function closeEditModal() {
-    document.getElementById('edit-modal').classList.remove('open');
-  }
-
-  async function saveProfile() {
-    const profile_name = document.getElementById('edit-displayname').value.trim();
-    const username     = document.getElementById('edit-username').value.trim();
-    const department   = document.getElementById('edit-dept').value;
-    const level        = document.getElementById('edit-level').value;
-
-    if (!profile_name && !username) {
-      document.getElementById('edit-alert').innerHTML = '<div class="alert alert-error">Fill in at least one field</div>';
-      return;
-    }
-
-    try {
-      const res  = await fetch(`${API}/api/users/me`, {
-        method: 'PATCH',
-        headers: authHeaders(),
-        body: JSON.stringify({ profile_name, username, department, level })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Update failed');
-
-      // Update stored user
-      const user = getUser();
-      const updated = { ...user, ...data.user };
-      localStorage.setItem('riu_user', JSON.stringify(updated));
-
-      // Update header display
-      document.getElementById('s-user').textContent = updated.profile_name || updated.username;
-
-      document.getElementById('edit-alert').innerHTML = '<div class="alert alert-success">✅ Profile updated!</div>';
-      toast('✅ Profile saved!');
-
-      // Refresh dashboard
-      setTimeout(() => { closeEditModal(); loadDashboard('profile'); }, 1200);
-    } catch (err) {
-      document.getElementById('edit-alert').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
-    }
-  }
-
-  async function savePassword() {
-    const current  = document.getElementById('edit-current-pw').value;
-    const newPw    = document.getElementById('edit-new-pw').value;
-    const confirm  = document.getElementById('edit-confirm-pw').value;
-
-    if (!current || !newPw || !confirm) {
-      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-error">Fill in all password fields</div>';
-      return;
-    }
-    if (newPw !== confirm) {
-      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-error">New passwords do not match</div>';
-      return;
-    }
-    if (newPw.length < 6) {
-      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-error">Password must be at least 6 characters</div>';
-      return;
-    }
-
-    try {
-      const res  = await fetch(`${API}/api/users/me/password`, {
-        method: 'PATCH',
-        headers: authHeaders(),
-        body: JSON.stringify({ current_password: current, new_password: newPw })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
-
-      document.getElementById('pw-alert').innerHTML = '<div class="alert alert-success">✅ Password changed!</div>';
-      document.getElementById('edit-current-pw').value = '';
-      document.getElementById('edit-new-pw').value     = '';
-      document.getElementById('edit-confirm-pw').value = '';
-      toast('🔒 Password updated!');
-    } catch (err) {
-      document.getElementById('pw-alert').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
-    }
-  }
-
-  // ── ADMIN PROMOTION ───────────────────────────────────────────────────
-  async function toggleAdmin(userId, makeAdmin) {
-    const action = makeAdmin ? 'make-admin' : 'remove-admin';
-    const label  = makeAdmin ? 'promote to admin' : 'remove admin access';
-    if (!confirm(`Are you sure you want to ${label} for this user?`)) return;
-    try {
-      const res  = await fetch(`${API}/api/users/${userId}/${action}`, {
-        method: 'PATCH', headers: authHeaders()
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
-      toast(makeAdmin ? '⚡ User promoted to admin!' : '👤 Admin access removed');
-      loadAdmin('users'); // refresh users tab
-    } catch (err) { toast('❌ ' + err.message); }
   }
 
 
